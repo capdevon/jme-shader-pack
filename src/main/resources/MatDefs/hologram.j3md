@@ -1,0 +1,64 @@
+MaterialDef Simple {
+    MaterialParameters {
+        
+        Color Color          : 1.0 1.0 1.0 1.0
+        Vector3 Direction    : 0.0 1.0 0.0
+        Float ScanOffset     : 0.0
+        Float LineFrequency  : 180.0
+        Float ScanFrequency  : -1.0
+        Float LineSpeed      : -0.3
+        Float ScanSpeed      : 1.0
+        Float ScanMinimum    : 0.5
+        Float Intensity      : 1.0
+        
+        Boolean UseVertexColor
+        Boolean EnableGlow
+        
+        // hardware skinning
+        Int NumberOfBones
+        Matrix4Array BoneMatrices
+        FloatArray MorphWeights
+        Int NumberOfMorphTargets
+        Int NumberOfTargetsBuffers
+                
+        // instancing
+        Boolean UseInstancing
+        
+    }
+    Technique {
+        VertexShader   GLSL450 GLSL300 GLSL150 : Shaders/vert.vert
+        FragmentShader GLSL450 GLSL300 GLSL150 : Shaders/hologram.frag
+        WorldParameters {
+            WorldViewProjectionMatrix
+            WorldNormalMatrix
+            WorldMatrix
+            CameraPosition
+            Time
+        }
+        Defines {
+            USE_VERTEX_COLOR    : UseVertexColor
+            NUM_MORPH_TARGETS   : NumberOfMorphTargets
+            NUM_TARGETS_BUFFERS : NumberOfTargetsBuffers
+            NUM_BONES           : NumberOfBones
+            INSTANCING          : UseInstancing
+        }
+    }
+    Technique Glow {
+        VertexShader   GLSL450 GLSL300 GLSL150 : Shaders/vert.vert
+        FragmentShader GLSL450 GLSL300 GLSL150 : Shaders/hologram-glow.frag
+        WorldParameters {
+            WorldViewProjectionMatrix
+            WorldViewMatrix
+            ViewProjectionMatrix
+            ViewMatrix
+            CameraPosition
+        }
+        Defines {
+            USE_VERTEX_COLOR : UseVertexColor
+            NUM_MORPH_TARGETS: NumberOfMorphTargets
+            NUM_TARGETS_BUFFERS: NumberOfTargetsBuffers
+            NUM_BONES : NumberOfBones
+            INSTANCING : UseInstancing
+        }
+    }
+}
