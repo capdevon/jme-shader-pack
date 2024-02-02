@@ -69,7 +69,7 @@ public class Test_Hologram extends SimpleApplication {
         initScene();
         initFilters();
 
-//        stateManager.attach(new DebugGridState());
+        stateManager.attach(new DebugGridState());
 //        stateManager.attach(new DetailedProfilerState());
 
         if (captureVideo) {
