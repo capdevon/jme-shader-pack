@@ -1,0 +1,22 @@
+Material Erika_Archer_Clothes_Mesh : Common/MatDefs/Light/PBRLighting.j3md {
+
+    MaterialParameters {
+      Glossiness : 1.0
+      EmissivePower : 3.0
+      BaseColor : 0.8 0.8 0.8 0.0
+      ParallaxHeight : 0.05
+      Metallic : 0.4
+      BackfaceShadows : false
+      Roughness : 0.30151135
+      NormalType : -1.0
+      Emissive : 0.0 0.0 0.0 1.0
+      EmissiveIntensity : 2.0
+      BaseColorMap : WrapRepeat_S WrapRepeat_T MinBilinearNoMipMaps "Models/Erika/FemaleFitA_eyelash_diffuse.jpg"
+      Specular : 1.0 1.0 1.0 1.0
+    }
+
+    AdditionalRenderState {
+      PointSprite On
+      Blend Alpha
+    }
+}
