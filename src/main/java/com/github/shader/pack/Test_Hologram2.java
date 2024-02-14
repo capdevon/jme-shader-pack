@@ -1,6 +1,7 @@
 package com.github.shader.pack;
 
 import com.github.mat.editor.MatPropertyPanelBuilder;
+import com.github.tools.editor.FilterEditorBuilder;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.input.KeyInput;
@@ -17,6 +18,7 @@ import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
 import com.jme3.post.FilterPostProcessor;
 import com.jme3.post.filters.BloomFilter;
+import com.jme3.post.filters.ColorOverlayFilter;
 import com.jme3.post.filters.FXAAFilter;
 import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Geometry;
@@ -28,7 +30,7 @@ import com.jme3.scene.shape.Cylinder;
 import com.jme3.scene.shape.PQTorus;
 import com.jme3.scene.shape.Sphere;
 import com.jme3.scene.shape.Torus;
-import com.jme3.shadow.DirectionalLightShadowRenderer;
+import com.jme3.shadow.DirectionalLightShadowFilter;
 import com.jme3.shadow.EdgeFilteringMode;
 import com.jme3.system.AppSettings;
 import com.jme3.texture.Texture;
@@ -102,11 +104,19 @@ public class Test_Hologram2 extends SimpleApplication implements ActionListener 
         GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
         
         initMaterialEditor();
+        initFilterEditor();
+    }
+
+    private void initFilterEditor() {
+        FilterEditorBuilder builder = new FilterEditorBuilder();
+        Container container = builder.buildPanel(viewPort);
+        container.setLocalTranslation(10f, settings.getHeight() - 10f, 1);
+        guiNode.attachChild(container);
     }
     
     private void initMaterialEditor() {
         MatPropertyPanelBuilder builder = new MatPropertyPanelBuilder();
-        Container container = builder.createPropertyPanel(geom);
+        Container container = builder.buildPanel(geom);
         container.setLocalTranslation(settings.getWidth() - settings.getWidth() / 4f, settings.getHeight() - 10f, 1);
         guiNode.attachChild(container);
     }
@@ -146,9 +156,9 @@ public class Test_Hologram2 extends SimpleApplication implements ActionListener 
      */
     private void addQuad(Vector3f position, Quaternion rotation, Node parent) {
         Material pbr = new Material(assetManager, "Common/MatDefs/Light/PBRLighting.j3md");
-        Texture tex = assetManager.loadTexture("Textures/default_grid.png");
-        tex.setWrap(WrapMode.Repeat);
-        pbr.setTexture("BaseColorMap", tex);
+        Texture texture = assetManager.loadTexture("Textures/default_grid.png");
+        texture.setWrap(WrapMode.Repeat);
+        pbr.setTexture("BaseColorMap", texture);
         pbr.setColor("BaseColor", ColorRGBA.Gray);
         pbr.setFloat("Metallic", 0.6f);
         pbr.setFloat("Roughness", 0.4f);
@@ -175,22 +185,32 @@ public class Test_Hologram2 extends SimpleApplication implements ActionListener 
         sun.setDirection(new Vector3f(-1, -1, -1).normalizeLocal());
         rootNode.addLight(sun);
 
-        DirectionalLightShadowRenderer dlsr = new DirectionalLightShadowRenderer(assetManager, 4_096, 3);
-        dlsr.setEdgeFilteringMode(EdgeFilteringMode.PCFPOISSON);
-        dlsr.setEdgesThickness(5);
-        dlsr.setLight(sun);
-        dlsr.setShadowIntensity(0.65f);
-        viewPort.addProcessor(dlsr);
+//        DirectionalLightShadowRenderer dlsr = new DirectionalLightShadowRenderer(assetManager, 4_096, 3);
+//        dlsr.setEdgeFilteringMode(EdgeFilteringMode.PCFPOISSON);
+//        dlsr.setEdgesThickness(5);
+//        dlsr.setShadowIntensity(0.65f);
+//        dlsr.setLight(sun);
+//        viewPort.addProcessor(dlsr);
 
         FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
         viewPort.addProcessor(fpp);
+        
+        DirectionalLightShadowFilter dlsf = new DirectionalLightShadowFilter(assetManager, 4096, 3);
+        dlsf.setLight(sun);
+        dlsf.setShadowIntensity(0.4f);
+        dlsf.setShadowZExtend(256);
+        dlsf.setEdgeFilteringMode(EdgeFilteringMode.PCFPOISSON);
+        fpp.addFilter(dlsf);
 
-        BloomFilter bloom = new BloomFilter(BloomFilter.GlowMode.Objects);
+        BloomFilter bloom = new BloomFilter(BloomFilter.GlowMode.Scene);
         bloom.setBloomIntensity(5.0f);
         fpp.addFilter(bloom);
 
         FXAAFilter fxaa = new FXAAFilter();
         fpp.addFilter(fxaa);
+        
+        ColorOverlayFilter overlay = new ColorOverlayFilter();
+        fpp.addFilter(overlay);
     }
 
     @Override
