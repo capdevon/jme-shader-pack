@@ -32,9 +32,14 @@ public class MatPropertyPanelBuilder {
     private static final SpinnerFloatModel DefaultSpinnerFloatModel = new SpinnerFloatModel(-200f, 200f, 0.1f);
     private static final SpinnerIntegerModel DefaultSpinnerIntModel = new SpinnerIntegerModel(-200, 200, 1);
     
+    private final String[] ignoredProperties;
     private final Map<String, SpinnerModel> constraints = new HashMap<>();
     
-    public MatPropertyPanelBuilder() {
+    /**
+     * @param ignoredProperties
+     */
+    public MatPropertyPanelBuilder(String... ignoredProperties) {
+        this.ignoredProperties = ignoredProperties;
         addConstraints(MatConstraints.getPBRConstraints());
     }
     
@@ -55,12 +60,7 @@ public class MatPropertyPanelBuilder {
         constraints.putAll(map);
     }
 
-    /**
-     * 
-     * @param spatial
-     * @return
-     */
-    public Container createPropertyPanel(Spatial spatial) {
+    public Container buildPanel(Spatial spatial) {
 
         Container container = new Container(new SpringGridLayout(Axis.Y, Axis.X, FillMode.None, FillMode.Even));
 //        TabbedPanel tabbedPanel = container.addChild(new TabbedPanel());
@@ -106,12 +106,16 @@ public class MatPropertyPanelBuilder {
 
         PropertyPanel propertyPanel = container.addChild(new PropertyPanel("glass"));
 
-        // material params
+        // TODO: sort material params by name
         int numParams = material.getParamsMap().size();
         for (int i = 0; i < numParams; i++) {
 
             MatParam param = material.getParamsMap().getValue(i);
             System.out.println("MatParam: " + param);
+            
+            if (ignoreProperty(param)) {
+                continue;
+            }
 
             String name = param.getName();
             Object value = param.getValue();
@@ -143,18 +147,18 @@ public class MatPropertyPanelBuilder {
                 propertyPanel.addBooleanProperty(name, mp, "value");
 
             } else if (value instanceof Texture2D) {
-                // container.addChild(createLabelInput(key + ":", ((Texture2D) value).getName()));
+                // container.addChild(createLabelValue(key + ":", ((Texture2D) value).getName()));
                 // MatLabelProperty ???
             }
         }
         
         RenderState renderState = material.getAdditionalRenderState();
-        container.addChild(createAdditionalRenderStateSection(renderState));
+        container.addChild(createRenderStateSection(renderState));
 
         return container;
     }
-    
-    private Panel createAdditionalRenderStateSection(RenderState renderState) {
+
+    private Panel createRenderStateSection(RenderState renderState) {
 
         PropertyPanel propertyPanel = new PropertyPanel("glass");
         propertyPanel.addEnumProperty("FaceCullMode", renderState, "faceCullMode");
@@ -177,6 +181,21 @@ public class MatPropertyPanelBuilder {
         container.addChild(new Label(label, new ElementId("label")));
         container.addChild(new Label(value, new ElementId("label-ro")));
         return container;
+    }
+    
+    /**
+     * @param param
+     * @return
+     */
+    private boolean ignoreProperty(MatParam param) {
+        boolean ignoreProperty = false;
+        for (String ignoredProperty : ignoredProperties) {
+            if (param.getName().equalsIgnoreCase(ignoredProperty)) {
+                ignoreProperty = true;
+                break;
+            }
+        }
+        return ignoreProperty;
     }
     
 }
