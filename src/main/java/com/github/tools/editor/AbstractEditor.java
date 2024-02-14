@@ -5,6 +5,7 @@ import java.beans.PropertyDescriptor;
 
 import com.github.tools.properties.ColorRGBAProperty;
 import com.github.tools.properties.QuaternionProperty;
+import com.github.tools.properties.Vector2Property;
 import com.github.tools.properties.Vector3Property;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.Panel;
@@ -15,6 +16,12 @@ import com.simsilica.lemur.Panel;
  */
 public abstract class AbstractEditor<T> {
 
+    protected Panel addVector2Property(String displayName, Object bean, String propertyName) throws IntrospectionException {
+        PropertyDescriptor pd = new PropertyDescriptor(propertyName, bean.getClass());
+        pd.setDisplayName(displayName);
+        return new Vector2Property(bean, pd).buildPanel();
+    }
+    
     protected Panel addVector3Property(String displayName, Object bean, String propertyName) throws IntrospectionException {
         PropertyDescriptor pd = new PropertyDescriptor(propertyName, bean.getClass());
         pd.setDisplayName(displayName);
