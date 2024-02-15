@@ -20,7 +20,7 @@ import com.simsilica.lemur.component.SpringGridLayout;
  */
 public class Vector3Property extends JmeProperty<Vector3f> {
     
-    private TextField stringProperty;
+    private TextField textField;
     private Vector3f vector;
     
     public Vector3Property(Object bean, PropertyDescriptor pd) {
@@ -35,12 +35,12 @@ public class Vector3Property extends JmeProperty<Vector3f> {
         
         Container values = container.addChild(new Container(new SpringGridLayout(Axis.X, Axis.Y, FillMode.First, FillMode.Even)));
         String initialValue = getAsText();
-        stringProperty = values.addChild(new TextField(initialValue));
-        stringProperty.setTextVAlignment(VAlignment.Center);
+        textField = values.addChild(new TextField(initialValue));
+        textField.setTextVAlignment(VAlignment.Center);
 
         Button button = values.addChild(new Button("Set"));
         button.addClickCommands(cmd -> {
-            String newValue = stringProperty.getText();
+            String newValue = textField.getText();
             setAsText(newValue);
         });
 
@@ -57,7 +57,7 @@ public class Vector3Property extends JmeProperty<Vector3f> {
     protected void setAsText(String text) {
         try {
             parseInto(text, vector);
-            stringProperty.setText(getAsText());
+            textField.setText(getAsText());
             setValue(vector);
             
         } catch (Exception e) {
