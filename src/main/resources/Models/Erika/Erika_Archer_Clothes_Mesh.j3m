@@ -11,7 +11,7 @@ Material Erika_Archer_Clothes_Mesh : Common/MatDefs/Light/PBRLighting.j3md {
       NormalType : -1.0
       Emissive : 0.0 0.0 0.0 1.0
       EmissiveIntensity : 2.0
-      BaseColorMap : WrapRepeat_S WrapRepeat_T MinBilinearNoMipMaps "Models/Erika/FemaleFitA_eyelash_diffuse.jpg"
+      BaseColorMap : WrapRepeat_S WrapRepeat_T MinBilinearNoMipMaps "Models/Erika/FemaleFitA_eyelash_diffuse.png"
       Specular : 1.0 1.0 1.0 1.0
     }
 

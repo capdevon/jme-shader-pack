@@ -3,21 +3,20 @@ Material Erika_Archer_Eyes_Mesh : Common/MatDefs/Light/PBRLighting.j3md {
     MaterialParameters {
       EmissivePower : 3.0
       BackfaceShadows : false
-      Roughness : 0.30151135
+      Roughness : 0.19349419
       EmissiveIntensity : 2.0
       Glossiness : 1.0
-      BaseColor : 0.8 0.8 0.8 0.0
+      BaseColor : 0.8 0.8 0.8 1.0
       ParallaxHeight : 0.05
       Metallic : 0.4
       NormalType : 1.0
       Emissive : 0.0 0.0 0.0 1.0
-      NormalMap : WrapRepeat_S WrapRepeat_T MinBilinearNoMipMaps "Models/Erika/Arrow_NM.jpg"
-      BaseColorMap : WrapRepeat_S WrapRepeat_T MinBilinearNoMipMaps "Models/Erika/Arrow_DIFF.jpg"
+      NormalMap : WrapRepeat_S WrapRepeat_T MinBilinearNoMipMaps "Models/Erika/FemaleFitA_StdNM.png"
+      BaseColorMap : WrapRepeat_S WrapRepeat_T MinBilinearNoMipMaps "Models/Erika/FemaleFitA_Body_diffuse.png"
       Specular : 1.0 1.0 1.0 1.0
     }
 
     AdditionalRenderState {
       PointSprite On
-      Blend Alpha
     }
 }
