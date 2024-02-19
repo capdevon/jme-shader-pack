@@ -9,10 +9,12 @@ import com.github.tools.properties.ColorRGBAProperty;
 import com.github.tools.properties.QuaternionProperty;
 import com.github.tools.properties.Vector2Property;
 import com.github.tools.properties.Vector3Property;
+import com.github.tools.properties.Vector4Property;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
+import com.jme3.math.Vector4f;
 import com.simsilica.lemur.Axis;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.FillMode;
@@ -62,11 +64,14 @@ public class ReflectedEditorBuilder extends AbstractEditor<Object> {
                 String propertyName = pd.getName();
                 Class<?> fieldType = pd.getPropertyType();
 
-                if (fieldType == Vector3f.class) {
+                if (fieldType == Vector2f.class) {
+                    container.addChild(new Vector2Property(bean, pd).buildPanel());
+
+                } else if (fieldType == Vector3f.class) {
                     container.addChild(new Vector3Property(bean, pd).buildPanel());
 
-                } else if (fieldType == Vector2f.class) {
-                    container.addChild(new Vector2Property(bean, pd).buildPanel());
+                } else if (fieldType == Vector4f.class) {
+                    container.addChild(new Vector4Property(bean, pd).buildPanel());
 
                 } else if (fieldType == Quaternion.class) {
                     container.addChild(new QuaternionProperty(bean, pd).buildPanel());
@@ -74,13 +79,13 @@ public class ReflectedEditorBuilder extends AbstractEditor<Object> {
                 } else if (fieldType == ColorRGBA.class) {
                     container.addChild(new ColorRGBAProperty(bean, pd).buildPanel());
 
-                } else if (fieldType == float.class) { //TODO: add constraints
+                } else if (fieldType == float.class || fieldType == Float.class) { //TODO: add constraints
                     propertyPanel.addFloatProperty(propertyName, bean, propertyName, -100, 100, 0.1f);
 
-                } else if (fieldType == int.class) { //TODO: add constraints
+                } else if (fieldType == int.class || fieldType == Integer.class) { //TODO: add constraints
                     propertyPanel.addIntProperty(propertyName, bean, propertyName, -100, 100, 1);
 
-                } else if (fieldType == boolean.class) {
+                } else if (fieldType == boolean.class || fieldType == Boolean.class) {
                     propertyPanel.addBooleanProperty(propertyName, bean, propertyName);
 
                 } else if (fieldType.isEnum()) {
