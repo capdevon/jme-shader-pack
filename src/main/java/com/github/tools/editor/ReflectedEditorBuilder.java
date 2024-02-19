@@ -5,6 +5,9 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 
+import com.github.tools.SpinnerFloatModel;
+import com.github.tools.SpinnerIntegerModel;
+import com.github.tools.SpinnerModel;
 import com.github.tools.properties.ColorRGBAProperty;
 import com.github.tools.properties.QuaternionProperty;
 import com.github.tools.properties.Vector2Property;
@@ -27,6 +30,9 @@ import com.simsilica.lemur.props.PropertyPanel;
  */
 public class ReflectedEditorBuilder extends AbstractEditor<Object> {
     
+    private static final SpinnerFloatModel DefaultSpinnerFloatModel = new SpinnerFloatModel(0f, 1f, 0.1f);
+    private static final SpinnerIntegerModel DefaultSpinnerIntModel = new SpinnerIntegerModel(0, 100, 1);
+    
     private final String[] ignoredProperties;
     
     /**
@@ -35,7 +41,7 @@ public class ReflectedEditorBuilder extends AbstractEditor<Object> {
     public ReflectedEditorBuilder(String... ignoredProperties) {
         this.ignoredProperties = ignoredProperties;
     }
-
+    
     @Override
     public Container buildPanel(Object bean) {
 
@@ -61,7 +67,7 @@ public class ReflectedEditorBuilder extends AbstractEditor<Object> {
                         pd.getPropertyType().getSimpleName(), pd.getName(), 
                         pd.getReadMethod().getName(), pd.getWriteMethod().getName());
                 
-                String propertyName = pd.getName();
+                String name = pd.getName();
                 Class<?> fieldType = pd.getPropertyType();
 
                 if (fieldType == Vector2f.class) {
@@ -79,20 +85,22 @@ public class ReflectedEditorBuilder extends AbstractEditor<Object> {
                 } else if (fieldType == ColorRGBA.class) {
                     container.addChild(new ColorRGBAProperty(bean, pd).buildPanel());
 
-                } else if (fieldType == float.class || fieldType == Float.class) { //TODO: add constraints
-                    propertyPanel.addFloatProperty(propertyName, bean, propertyName, -100, 100, 0.1f);
+                } else if (fieldType == float.class || fieldType == Float.class) {
+                    SpinnerModel<Float> range = constraints.getOrDefault(name, DefaultSpinnerFloatModel);
+                    propertyPanel.addFloatProperty(name, bean, name, range.getMinValue(), range.getMaxValue(), range.getStep());
 
-                } else if (fieldType == int.class || fieldType == Integer.class) { //TODO: add constraints
-                    propertyPanel.addIntProperty(propertyName, bean, propertyName, -100, 100, 1);
+                } else if (fieldType == int.class || fieldType == Integer.class) {
+                    SpinnerModel<Integer> range = constraints.getOrDefault(name, DefaultSpinnerIntModel);
+                    propertyPanel.addIntProperty(name, bean, name, range.getMinValue(), range.getMaxValue(), range.getStep());
 
                 } else if (fieldType == boolean.class || fieldType == Boolean.class) {
-                    propertyPanel.addBooleanProperty(propertyName, bean, propertyName);
+                    propertyPanel.addBooleanProperty(name, bean, name);
 
                 } else if (fieldType.isEnum()) {
-                    propertyPanel.addEnumProperty(propertyName, bean, propertyName);
+                    propertyPanel.addEnumProperty(name, bean, name);
                     
                 } else {
-                    System.err.println("Not supported yet: " + propertyName + ", Type: " + fieldType);
+                    System.err.println("Not supported yet: " + name + ", Type: " + fieldType);
                 }
             }
         }

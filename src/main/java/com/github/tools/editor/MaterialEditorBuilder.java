@@ -1,23 +1,22 @@
 package com.github.tools.editor;
 
-import java.util.HashMap;
-import java.util.Map;
-
-import com.github.mat.editor.MatColorProperty;
-import com.github.mat.editor.MatConstraints;
-import com.github.mat.editor.MatParamProperty;
-import com.github.mat.editor.MatVec2Property;
-import com.github.mat.editor.MatVec3Property;
-import com.github.mat.editor.MaterialSerializer;
-import com.github.mat.editor.SpinnerFloatModel;
-import com.github.mat.editor.SpinnerIntegerModel;
-import com.github.mat.editor.SpinnerModel;
+import com.github.tools.SpinnerFloatModel;
+import com.github.tools.SpinnerIntegerModel;
+import com.github.tools.SpinnerModel;
+import com.github.tools.material.MatColorProperty;
+import com.github.tools.material.MatConstraints;
+import com.github.tools.material.MatParamProperty;
+import com.github.tools.material.MatVec2Property;
+import com.github.tools.material.MatVec3Property;
+import com.github.tools.material.MatVec4Property;
+import com.github.tools.material.MaterialSerializer;
 import com.jme3.material.MatParam;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector2f;
 import com.jme3.math.Vector3f;
+import com.jme3.math.Vector4f;
 import com.jme3.texture.Texture2D;
 import com.simsilica.lemur.Axis;
 import com.simsilica.lemur.Container;
@@ -39,7 +38,6 @@ public class MaterialEditorBuilder extends AbstractEditor<Material> {
     private static final SpinnerIntegerModel DefaultSpinnerIntModel = new SpinnerIntegerModel(-200, 200, 1);
     
     private final String[] ignoredProperties;
-    private final Map<String, SpinnerModel> constraints = new HashMap<>();
     
     /**
      * @param ignoredProperties
@@ -49,23 +47,6 @@ public class MaterialEditorBuilder extends AbstractEditor<Material> {
         addConstraints(MatConstraints.getPBRConstraints());
     }
     
-    /**
-     * Add a new constraint definition.
-     * @param paramName
-     * @param model
-     */
-    public final void addConstraint(String paramName, SpinnerModel<?> model) {
-        constraints.put(paramName, model);
-    }
-
-    /**
-     * Copies all of the constraints from the specified map to this map.
-     * @param map
-     */
-    public final void addConstraints(Map<String, SpinnerModel> map) {
-        constraints.putAll(map);
-    }
-
     @SuppressWarnings("unchecked")
     public Container buildPanel(Material material) {
         
@@ -106,6 +87,10 @@ public class MaterialEditorBuilder extends AbstractEditor<Material> {
 
             } else if (value instanceof Vector3f) {
                 MatVec3Property mp = new MatVec3Property(name, material);
+                container.addChild(mp.buildPanel());
+
+            } else if (value instanceof Vector4f) {
+                MatVec4Property mp = new MatVec4Property(name, material);
                 container.addChild(mp.buildPanel());
 
             } else if (value instanceof Float) {
