@@ -1,4 +1,4 @@
-package com.github.mat.editor;
+package com.github.tools.material;
 
 import com.jme3.material.Material;
 import com.jme3.shader.VarType;

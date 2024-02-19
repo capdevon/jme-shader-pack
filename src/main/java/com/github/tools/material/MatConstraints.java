@@ -1,8 +1,11 @@
-package com.github.mat.editor;
+package com.github.tools.material;
 
 import java.util.Collections;
 import java.util.HashMap;
 import java.util.Map;
+
+import com.github.tools.SpinnerFloatModel;
+import com.github.tools.SpinnerModel;
 
 /**
  * 

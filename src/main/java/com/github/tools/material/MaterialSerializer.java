@@ -1,4 +1,4 @@
-package com.github.mat.editor;
+package com.github.tools.material;
 
 import java.util.Collection;
 

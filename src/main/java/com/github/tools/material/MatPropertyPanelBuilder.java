@@ -1,7 +1,4 @@
-package com.github.mat.editor;
-
-import java.util.HashMap;
-import java.util.Map;
+package com.github.tools.material;
 
 import com.github.tools.editor.MaterialEditorBuilder;
 import com.jme3.scene.Geometry;
@@ -21,30 +18,12 @@ import com.simsilica.lemur.component.SpringGridLayout;
 public class MatPropertyPanelBuilder {
     
     private final String[] ignoredProperties;
-    private final Map<String, SpinnerModel> constraints = new HashMap<>();
     
     /**
      * @param ignoredProperties
      */
     public MatPropertyPanelBuilder(String... ignoredProperties) {
         this.ignoredProperties = ignoredProperties;
-    }
-    
-    /**
-     * Add a new constraint definition.
-     * @param paramName
-     * @param model
-     */
-    public final void addConstraint(String paramName, SpinnerModel<?> model) {
-        constraints.put(paramName, model);
-    }
-
-    /**
-     * Copies all of the constraints from the specified map to this map.
-     * @param map
-     */
-    public final void addConstraints(Map<String, SpinnerModel> map) {
-        constraints.putAll(map);
     }
 
     public Container buildPanel(Spatial spatial) {
@@ -64,7 +43,7 @@ public class MatPropertyPanelBuilder {
 
                 String title = geom.toString();
                 MaterialEditorBuilder builder = new MaterialEditorBuilder(ignoredProperties);
-                builder.addConstraints(constraints);
+                //builder.addConstraints(constraints);
                 Panel panel = builder.buildPanel(geom.getMaterial());
                 
                 RollupPanel rollup = new RollupPanel(title, panel, "glass");

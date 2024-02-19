@@ -1,9 +1,9 @@
-package com.github.mat.editor;
+package com.github.tools.material;
 
 import java.util.Locale;
 
 import com.jme3.material.Material;
-import com.jme3.math.Vector3f;
+import com.jme3.math.Vector4f;
 import com.simsilica.lemur.Axis;
 import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Container;
@@ -18,12 +18,12 @@ import com.simsilica.lemur.component.SpringGridLayout;
  * 
  * @author capdevon
  */
-public class MatVec3Property extends MatParamProperty<Vector3f> implements MatPropertyBuilder {
+public class MatVec4Property extends MatParamProperty<Vector4f> implements MatPropertyBuilder {
 
     private TextField textField;
-    private Vector3f vector = new Vector3f();
+    private Vector4f vector = new Vector4f();
 
-    public MatVec3Property(String name, Material material) {
+    public MatVec4Property(String name, Material material) {
         super(name, material);
         vector = getValue();
     }
@@ -49,9 +49,9 @@ public class MatVec3Property extends MatParamProperty<Vector3f> implements MatPr
 
     protected String getAsText() {
         if (vector == null) {
-            vector = new Vector3f();
+            vector = new Vector4f();
         }
-        return String.format(Locale.US, "[%.2f, %.2f, %.2f]", vector.x, vector.y, vector.z);
+        return String.format(Locale.US, "[%.2f, %.2f, %.2f, %.2f]", vector.x, vector.y, vector.z, vector.w);
     }
 
     protected void setAsText(String text) {
@@ -65,18 +65,18 @@ public class MatVec3Property extends MatParamProperty<Vector3f> implements MatPr
         }
     }
 
-    private void parseInto(String text, Vector3f storeResult) throws IllegalArgumentException {
+    private void parseInto(String text, Vector4f storeResult) throws IllegalArgumentException {
         text = text.replace('[', ' ');
         text = text.replace(']', ' ').trim();
         String[] a = text.split("\\s*(,|\\s)\\s*");
 
         if (a.length == 1) {
             if (text.trim().equalsIgnoreCase("nan")) {
-                storeResult.set(Vector3f.NAN);
+                storeResult.set(Vector4f.NAN);
                 return;
             }
             float f = Float.parseFloat(text);
-            storeResult.set(f, f, f);
+            storeResult.set(f, f, f, f);
             return;
         }
 
@@ -84,7 +84,8 @@ public class MatVec3Property extends MatParamProperty<Vector3f> implements MatPr
             float x = Float.parseFloat(a[0]);
             float y = Float.parseFloat(a[1]);
             float z = Float.parseFloat(a[2]);
-            storeResult.set(x, y, z);
+            float w = Float.parseFloat(a[3]);
+            storeResult.set(x, y, z, w);
             return;
         }
         throw new IllegalArgumentException("String not correct");
