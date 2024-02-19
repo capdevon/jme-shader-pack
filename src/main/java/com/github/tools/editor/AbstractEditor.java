@@ -44,31 +44,31 @@ public abstract class AbstractEditor<T> {
         constraints.putAll(map);
     }
 
-    public Panel addVector2Property(String displayName, Object bean, String propertyName) throws IntrospectionException {
+    public final Panel addVector2Property(String displayName, Object bean, String propertyName) throws IntrospectionException {
         PropertyDescriptor pd = new PropertyDescriptor(propertyName, bean.getClass());
         pd.setDisplayName(displayName);
         return new Vector2Property(bean, pd).buildPanel();
     }
     
-    public Panel addVector3Property(String displayName, Object bean, String propertyName) throws IntrospectionException {
+    public final Panel addVector3Property(String displayName, Object bean, String propertyName) throws IntrospectionException {
         PropertyDescriptor pd = new PropertyDescriptor(propertyName, bean.getClass());
         pd.setDisplayName(displayName);
         return new Vector3Property(bean, pd).buildPanel();
     }
     
-    public Panel addVector4Property(String displayName, Object bean, String propertyName) throws IntrospectionException {
+    public final Panel addVector4Property(String displayName, Object bean, String propertyName) throws IntrospectionException {
         PropertyDescriptor pd = new PropertyDescriptor(propertyName, bean.getClass());
         pd.setDisplayName(displayName);
         return new Vector4Property(bean, pd).buildPanel();
     }
     
-    public Panel addQuaternionProperty(String displayName, Object bean, String propertyName) throws IntrospectionException {
+    public final Panel addQuaternionProperty(String displayName, Object bean, String propertyName) throws IntrospectionException {
         PropertyDescriptor pd = new PropertyDescriptor(propertyName, bean.getClass());
         pd.setDisplayName(displayName);
         return new QuaternionProperty(bean, pd).buildPanel();
     }
     
-    public Panel addColorRGBAProperty(String displayName, Object bean, String propertyName) throws IntrospectionException {
+    public final Panel addColorRGBAProperty(String displayName, Object bean, String propertyName) throws IntrospectionException {
         PropertyDescriptor pd = new PropertyDescriptor(propertyName, bean.getClass());
         pd.setDisplayName(displayName);
         return new ColorRGBAProperty(bean, pd).buildPanel();
