@@ -1,14 +1,18 @@
 package com.github.mat.editor;
 
+import java.util.Locale;
+
 import com.jme3.material.Material;
 import com.jme3.math.Vector3f;
 import com.simsilica.lemur.Axis;
+import com.simsilica.lemur.Button;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.FillMode;
+import com.simsilica.lemur.Label;
 import com.simsilica.lemur.Panel;
-import com.simsilica.lemur.RollupPanel;
+import com.simsilica.lemur.TextField;
+import com.simsilica.lemur.VAlignment;
 import com.simsilica.lemur.component.SpringGridLayout;
-import com.simsilica.lemur.props.PropertyPanel;
 
 /**
  * 
@@ -16,73 +20,74 @@ import com.simsilica.lemur.props.PropertyPanel;
  */
 public class MatVec3Property extends MatParamProperty<Vector3f> implements MatPropertyBuilder {
 
-    private float x;
-    private float y;
-    private float z;
-    private SpinnerFloatModel range;
-    private Vector3f tmpVec = new Vector3f();
+    private TextField textField;
+    private Vector3f vector = new Vector3f();
 
-    public MatVec3Property(String name, Material material, SpinnerFloatModel model) {
+    public MatVec3Property(String name, Material material) {
         super(name, material);
-        this.range = model;
-        tmpVec = getValue();
+        vector = getValue();
     }
 
     @Override
     public Panel buildPanel() {
-        Container container = new Container(new SpringGridLayout(Axis.X, Axis.Y, FillMode.ForcedEven, FillMode.Even));
-        // container.addChild(new Label(name));
+        Container container = new Container(new SpringGridLayout(Axis.X, Axis.Y, FillMode.Last, FillMode.Even));
+        container.addChild(new Label(getName() + ":"));
+        
+        Container values = container.addChild(new Container(new SpringGridLayout(Axis.X, Axis.Y, FillMode.First, FillMode.Even)));
+        String initialValue = getAsText();
+        textField = values.addChild(new TextField(initialValue));
+        textField.setTextVAlignment(VAlignment.Center);
 
-        PropertyPanel propertyPanel = container.addChild(new PropertyPanel("glass"));
-        propertyPanel.addFloatProperty("x", this, "x", range.getMinValue(), range.getMaxValue(), range.getStep());
-        propertyPanel.addFloatProperty("y", this, "y", range.getMinValue(), range.getMaxValue(), range.getStep());
-        propertyPanel.addFloatProperty("z", this, "z", range.getMinValue(), range.getMaxValue(), range.getStep());
+        Button button = values.addChild(new Button("Set"));
+        button.addClickCommands(cmd -> {
+            String newValue = textField.getText();
+            setAsText(newValue);
+        });
 
-//        Button update = container.addChild(new Button("Set"));
-//        update.addClickCommands(cmd -> {
-//            material.setColor(name, color);
-//        });
-
-        RollupPanel rollup = new RollupPanel(this.getName(), propertyPanel, "glass");
-        // rollup.setAlpha(0, false);
-        rollup.setOpen(false);
-        container.addChild(rollup);
-
-        return rollup;
+        return container;
     }
 
-    public float getX() {
-        return x;
+    protected String getAsText() {
+        if (vector == null) {
+            vector = new Vector3f();
+        }
+        return String.format(Locale.US, "[%.2f, %.2f, %.2f]", vector.x, vector.y, vector.z);
     }
 
-    public void setX(float x) {
-        this.x = x;
-        updateVector();
+    protected void setAsText(String text) {
+        try {
+            parseInto(text, vector);
+            textField.setText(getAsText());
+            setValue(vector);
+            
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
-    public float getY() {
-        return y;
-    }
+    private void parseInto(String text, Vector3f storeResult) throws IllegalArgumentException {
+        text = text.replace('[', ' ');
+        text = text.replace(']', ' ').trim();
+        String[] a = text.split("\\s*(,|\\s)\\s*");
 
-    public void setY(float y) {
-        this.y = y;
-        updateVector();
-    }
-    
-    public float getZ() {
-        return z;
-    }
+        if (a.length == 1) {
+            if (text.trim().equalsIgnoreCase("nan")) {
+                storeResult.set(Vector3f.NAN);
+                return;
+            }
+            float f = Float.parseFloat(text);
+            storeResult.set(f, f, f);
+            return;
+        }
 
-    public void setZ(float z) {
-        this.z = z;
-        updateVector();
-    }
-
-    private void updateVector() {
-        tmpVec.x = x;
-        tmpVec.y = y;
-        tmpVec.z = z;
-        setValue(tmpVec);
+        if (a.length == 3) {
+            float x = Float.parseFloat(a[0]);
+            float y = Float.parseFloat(a[1]);
+            float z = Float.parseFloat(a[2]);
+            storeResult.set(x, y, z);
+            return;
+        }
+        throw new IllegalArgumentException("String not correct");
     }
 
 }
