@@ -1,4 +1,4 @@
-package BlendLayerEffect;
+package com.github.shader.pack;
 
 import com.jme3.material.MatParam;
 import com.jme3.material.Material;
