@@ -13,7 +13,7 @@ public class SpinnerIntegerModel extends SpinnerModel<Integer> {
      * @param maxValue
      * @param step
      */
-    protected SpinnerIntegerModel(Integer minValue, Integer maxValue, Integer step) {
+    public SpinnerIntegerModel(Integer minValue, Integer maxValue, Integer step) {
         super(minValue, maxValue, step);
     }
 

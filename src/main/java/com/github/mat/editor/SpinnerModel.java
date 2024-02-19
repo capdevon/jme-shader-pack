@@ -15,7 +15,7 @@ public abstract class SpinnerModel<T extends Number> {
      * @param maxValue
      * @param step
      */
-    protected SpinnerModel(T minValue, T maxValue, T step) {
+    public SpinnerModel(T minValue, T maxValue, T step) {
         this.minValue = minValue;
         this.maxValue = maxValue;
         this.step = step;

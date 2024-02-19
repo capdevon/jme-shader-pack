@@ -13,7 +13,7 @@ public class SpinnerFloatModel extends SpinnerModel<Float> {
      * @param maxValue
      * @param step
      */
-    protected SpinnerFloatModel(Float minValue, Float maxValue, Float step) {
+    public SpinnerFloatModel(Float minValue, Float maxValue, Float step) {
         super(minValue, maxValue, step);
     }
 
