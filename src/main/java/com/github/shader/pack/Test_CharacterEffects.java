@@ -3,7 +3,7 @@ package com.github.shader.pack;
 import java.util.ArrayList;
 import java.util.List;
 
-import com.github.mat.editor.MatPropertyPanelBuilder;
+import com.github.tools.material.MatPropertyPanelBuilder;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.light.AmbientLight;
@@ -78,7 +78,16 @@ public class Test_CharacterEffects extends SimpleApplication {
         initScene();
         initFilters();
         initLemur(this);
+        initShaderEffects();
 
+        stateManager.attach(new DebugGridState());
+//        stateManager.attach(new DetailedProfilerState());
+    }
+
+    /**
+     * 
+     */
+    private void initShaderEffects() {
         iceEffect = new BlendLayerEffect("Freeze", 0, yBotSpatial);
         iceEffect.addMaterialsFromSpatial(erikaSpatial);
         iceEffect.setBaseColorMap(assetManager.loadTexture("Models/Cracked_Ice/DefaultMaterial_baseColor.png"));
@@ -105,9 +114,6 @@ public class Test_CharacterEffects extends SimpleApplication {
         registerBlendEffectToSlider(iceEffect);
         registerBlendEffectToSlider(stoneEffect);
         registerBlendEffectToSlider(shieldEffect);
-
-        stateManager.attach(new DebugGridState());
-//        stateManager.attach(new DetailedProfilerState());
     }
     
     private void registerBlendEffectToSlider(BlendLayerEffect blendLayerEffect) {
@@ -123,10 +129,11 @@ public class Test_CharacterEffects extends SimpleApplication {
 
         blendValSliders.add(slider);
         sliderVersionedReferences.add(sizeSliderModel.createReference());
-
-        blendLayerContainer.setLocalTranslation(10f, settings.getHeight() - 10f, 1);
+        
         blendLayerContainer.addChild(label);
         blendLayerContainer.addChild(slider);
+        
+        blendLayerContainer.setLocalTranslation(10f, settings.getHeight() - 10f, 1);
         guiNode.attachChild(blendLayerContainer);
     }
 
@@ -208,8 +215,8 @@ public class Test_CharacterEffects extends SimpleApplication {
         rootNode.attachChild(erikaSpatial);
         rootNode.attachChild(yBotSpatial);
 
-        yBotSpatial.move(0.8f, 0, 0);
-        erikaSpatial.move(-0.8f, 0, 0);
+        yBotSpatial.move(1f, 0, 0);
+        erikaSpatial.move(-1f, 0, 0);
 
         setCorrectShader(yBotSpatial);
         setCorrectShader(erikaSpatial);
@@ -261,9 +268,10 @@ public class Test_CharacterEffects extends SimpleApplication {
         sun.setDirection(new Vector3f(-1, -1, -1).normalizeLocal());
         rootNode.addLight(sun);
 
-//        Node probeNode = (Node) assetManager.loadModel("LightProbes/defaultProbe.j3o");
-//        LightProbe lightProbe = (LightProbe) probeNode.getLocalLightList().get(0);
-        LightProbe lightProbe = (LightProbe) assetManager.loadAsset("LightProbes/quarry_Probe.j3o");
+        // add a PBR probe.
+        Spatial probeModel = assetManager.loadModel("Scenes/defaultProbe.j3o");
+        LightProbe lightProbe = (LightProbe) probeModel.getLocalLightList().get(0);
+        lightProbe.getArea().setRadius(100);
         rootNode.addLight(lightProbe);
 
         DirectionalLightShadowRenderer dlsr = new DirectionalLightShadowRenderer(assetManager, 4_096, 3);
@@ -274,7 +282,7 @@ public class Test_CharacterEffects extends SimpleApplication {
         viewPort.addProcessor(dlsr);
 
         AmbientLight al = new AmbientLight(new ColorRGBA(1.2f, 1.2f, 1.3f, 0.0f));
-        rootNode.addLight(al);
+//        rootNode.addLight(al);
 
         FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
         viewPort.addProcessor(fpp);

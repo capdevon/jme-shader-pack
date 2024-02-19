@@ -3,8 +3,8 @@ package com.github.shader.pack;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import com.github.mat.editor.MatPropertyPanelBuilder;
 import com.github.tools.GameObject;
+import com.github.tools.material.MatPropertyPanelBuilder;
 import com.jme3.anim.AnimComposer;
 import com.jme3.anim.SkinningControl;
 import com.jme3.app.Application;

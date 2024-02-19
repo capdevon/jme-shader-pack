@@ -1,7 +1,7 @@
 package com.github.shader.pack;
 
-import com.github.mat.editor.MatPropertyPanelBuilder;
 import com.github.tools.editor.FilterEditorBuilder;
+import com.github.tools.material.MatPropertyPanelBuilder;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.input.KeyInput;
