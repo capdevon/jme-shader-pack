@@ -1,8 +1,10 @@
-package com.github.shader.pack;
+package com.github.shader.demo;
 
 import java.util.ArrayList;
 import java.util.List;
 
+import com.github.shader.demo.utils.BlendLayerEffect;
+import com.github.shader.demo.utils.DebugGridState;
 import com.github.tools.material.MatPropertyPanelBuilder;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;

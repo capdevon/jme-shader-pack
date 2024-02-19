@@ -1,6 +1,7 @@
-package com.github.shader.pack;
+package com.github.shader.demo;
 
-import com.github.tools.AdapterControl;
+import com.github.shader.demo.utils.AdapterControl;
+import com.github.shader.demo.utils.RotateControl;
 import com.github.tools.editor.FilterEditorBuilder;
 import com.github.tools.material.MatPropertyPanelBuilder;
 import com.jme3.app.Application;

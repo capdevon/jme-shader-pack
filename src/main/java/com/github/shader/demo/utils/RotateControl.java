@@ -1,4 +1,4 @@
-package com.github.shader.pack;
+package com.github.shader.demo.utils;
 
 import java.io.IOException;
 

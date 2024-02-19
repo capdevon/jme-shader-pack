@@ -1,9 +1,10 @@
-package com.github.shader.pack;
+package com.github.shader.demo;
 
 import java.util.LinkedList;
 import java.util.Queue;
 
-import com.github.tools.GameObject;
+import com.github.shader.demo.utils.DebugGridState;
+import com.github.shader.demo.utils.GameObject;
 import com.github.tools.material.MatPropertyPanelBuilder;
 import com.jme3.anim.AnimComposer;
 import com.jme3.anim.SkinningControl;

@@ -1,4 +1,4 @@
-package com.github.tools;
+package com.github.shader.demo.utils;
 
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;

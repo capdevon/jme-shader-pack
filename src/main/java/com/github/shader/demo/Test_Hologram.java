@@ -1,7 +1,9 @@
-package com.github.shader.pack;
+package com.github.shader.demo;
 
 import java.io.File;
 
+import com.github.shader.demo.utils.DebugGridState;
+import com.github.shader.demo.utils.RotateControl;
 import com.jme3.app.DetailedProfilerState;
 import com.jme3.app.SimpleApplication;
 import com.jme3.app.state.VideoRecorderAppState;
