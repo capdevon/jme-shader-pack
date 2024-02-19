@@ -1,5 +1,6 @@
 package com.github.shader.pack;
 
+import com.github.tools.AdapterControl;
 import com.github.tools.editor.FilterEditorBuilder;
 import com.github.tools.material.MatPropertyPanelBuilder;
 import com.jme3.app.Application;

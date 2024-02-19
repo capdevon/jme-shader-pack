@@ -1,4 +1,4 @@
-package com.github.shader.pack;
+package com.github.tools;
 
 import com.jme3.renderer.RenderManager;
 import com.jme3.renderer.ViewPort;
