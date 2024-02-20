@@ -33,18 +33,16 @@ public class ConfigurationBuilder implements Configuration {
         return constraints;
     }
 
-    @SuppressWarnings("rawtypes")
     public ConfigurationBuilder setConstraints(Map<String, SpinnerModel> map) {
         constraints = new HashMap<>(map);
         return this;
     }
 
-    public ConfigurationBuilder addConstraint(String paramName, SpinnerModel<?> model) {
+    public ConfigurationBuilder addConstraint(String paramName, SpinnerModel model) {
         constraints.put(paramName, model);
         return this;
     }
 
-    @SuppressWarnings("rawtypes")
     public ConfigurationBuilder addConstraints(Map<String, SpinnerModel> map) {
         constraints.putAll(map);
         return this;
