@@ -1,6 +1,7 @@
 package com.github.tools.material;
 
 import com.github.tools.editor.MaterialEditorBuilder;
+import com.github.tools.util.ConfigurationBuilder;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.SceneGraphVisitorAdapter;
 import com.jme3.scene.Spatial;
@@ -33,7 +34,11 @@ public class MatPropertyPanelBuilder {
                 System.out.println("MeshMode: " + geom.getMesh().getMode());
 
                 String title = geom.toString();
-                MaterialEditorBuilder builder = new MaterialEditorBuilder();
+                
+                ConfigurationBuilder config = new ConfigurationBuilder();
+                config.addConstraints(MatConstraints.getPBRConstraints());
+                
+                MaterialEditorBuilder builder = new MaterialEditorBuilder(config);
                 Panel panel = builder.buildPanel(geom.getMaterial());
                 
                 RollupPanel rollup = new RollupPanel(title, panel, "glass");

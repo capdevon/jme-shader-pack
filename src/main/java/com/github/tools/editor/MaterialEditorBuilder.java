@@ -5,7 +5,6 @@ import org.slf4j.LoggerFactory;
 
 import com.github.tools.SpinnerModel;
 import com.github.tools.material.MatColorProperty;
-import com.github.tools.material.MatConstraints;
 import com.github.tools.material.MatParamProperty;
 import com.github.tools.material.MatVec2Property;
 import com.github.tools.material.MatVec3Property;
@@ -45,8 +44,7 @@ public class MaterialEditorBuilder extends AbstractEditor<Material> {
      * Creates a new instance of {@code MaterialEditorBuilder}.
      */
     public MaterialEditorBuilder() {
-        config = new ConfigurationBuilder()
-                .addConstraints(MatConstraints.getPBRConstraints());
+        config = new ConfigurationBuilder();
     }
     
     public MaterialEditorBuilder(Configuration config) {
