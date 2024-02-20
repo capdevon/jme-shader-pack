@@ -18,25 +18,25 @@ import java.util.List;
 public class BlendLayerEffect {
 
     private String name;
+    private int layerIndex = -1;
+    private String layerParamsPrefix;
+    private final Vector4f blendVec = new Vector4f();
+    private final List<Material> materials = new ArrayList<>();
+    // remove these and instead loop through all params of the first in the list of
+    // Materials for copy/pasting to newly registered mats
+    private Texture baseColorMap;
+    private Texture normalMap;
+    private Texture metallicRoughnessAoMap;
+    private Texture emissiveMap;
+    private boolean isTriplanar = true;
 
     public String getName() {
         return name;
     }
 
-    private int layerIndex = -1;
-    private String layerParamsPrefix;
-
-    private final Vector4f blendVec = new Vector4f();
-
     public float getBlendVar() {
         return blendVec.x;
     }
-
-    private final List<Material> materials = new ArrayList<>();
-
-    // remove these and instead loop through all params of the first in the list of
-    // Materials for copy/pasting to newly registered mats
-    private Texture baseColorMap, normalMap, metallicRoughnessAoMap, emissiveMap;
 
     public BlendLayerEffect(int layerIndex, List<Material> materials) {
         this(null, layerIndex, materials);
@@ -112,8 +112,6 @@ public class BlendLayerEffect {
             }
         });
     }
-
-    private boolean isTriplanar = true;
 
     public void setTriplanar(boolean isTriplanar) {
         this.isTriplanar = isTriplanar;
