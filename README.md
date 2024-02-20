@@ -9,3 +9,6 @@
 
 ## Credits
 [codex128](https://github.com/codex128) for writing the hologram shader.
+
+## Bug report / feature request
+The best way to report bug or feature request is [github's issues page](https://github.com/capdevon/jme-shader-pack/issues).
