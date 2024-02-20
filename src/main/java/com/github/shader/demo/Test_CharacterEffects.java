@@ -71,6 +71,8 @@ public class Test_CharacterEffects extends SimpleApplication {
         app.setSettings(settings);
         app.setShowSettings(false);
         app.setPauseOnLostFocus(false);
+        app.setDisplayFps(false);
+        app.setDisplayStatView(false);
         app.start();
     }
     
@@ -107,7 +109,7 @@ public class Test_CharacterEffects extends SimpleApplication {
     private void initMaterialEditor(Spatial model) {
         MatPropertyPanelBuilder builder = new MatPropertyPanelBuilder();
         Container container = builder.buildPanel(model);
-        container.setLocalTranslation(settings.getWidth() - settings.getWidth() / 4f, settings.getHeight() - 10f, 1);
+        container.setLocalTranslation(10f, settings.getHeight() - 10f, 1);
         guiNode.attachChild(container);
     }
     
@@ -119,8 +121,8 @@ public class Test_CharacterEffects extends SimpleApplication {
         yBotSpatial = loadModel("Models/YBot/YBot.j3o", new Vector3f(-1f, 0, 0), rootNode);
         erikaSpatial = loadModel("Models/Erika/Erika.j3o", new Vector3f(1f, 0, 0), rootNode);
 
-//        setCharacterShader(yBotSpatial); // FIXME: ???
-//        setCharacterShader(erikaSpatial); // FIXME: ???
+        setCharacterShader(yBotSpatial); // FIXME: ???
+        setCharacterShader(erikaSpatial); // FIXME: ???
         
         initMaterialEditor(erikaSpatial);
         initShaderEffects();
@@ -203,7 +205,7 @@ public class Test_CharacterEffects extends SimpleApplication {
             container.addChild(slider);
         }
         
-        container.setLocalTranslation(10f, settings.getHeight() - 10f, 1);
+        container.setLocalTranslation(settings.getWidth() - settings.getWidth() / 4f, settings.getHeight() - 10f, 1);
         guiNode.attachChild(container);
     }
 
