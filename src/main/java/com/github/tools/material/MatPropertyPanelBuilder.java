@@ -17,15 +17,6 @@ import com.simsilica.lemur.component.SpringGridLayout;
  */
 public class MatPropertyPanelBuilder {
     
-    private final String[] ignoredProperties;
-    
-    /**
-     * @param ignoredProperties
-     */
-    public MatPropertyPanelBuilder(String... ignoredProperties) {
-        this.ignoredProperties = ignoredProperties;
-    }
-
     public Container buildPanel(Spatial spatial) {
 
         Container container = new Container(new SpringGridLayout(Axis.Y, Axis.X, FillMode.None, FillMode.Even));
@@ -42,8 +33,7 @@ public class MatPropertyPanelBuilder {
                 System.out.println("MeshMode: " + geom.getMesh().getMode());
 
                 String title = geom.toString();
-                MaterialEditorBuilder builder = new MaterialEditorBuilder(ignoredProperties);
-                //builder.addConstraints(constraints);
+                MaterialEditorBuilder builder = new MaterialEditorBuilder();
                 Panel panel = builder.buildPanel(geom.getMaterial());
                 
                 RollupPanel rollup = new RollupPanel(title, panel, "glass");

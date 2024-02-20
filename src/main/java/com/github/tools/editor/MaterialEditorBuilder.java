@@ -1,7 +1,8 @@
 package com.github.tools.editor;
 
-import com.github.tools.SpinnerFloatModel;
-import com.github.tools.SpinnerIntegerModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.github.tools.SpinnerModel;
 import com.github.tools.material.MatColorProperty;
 import com.github.tools.material.MatConstraints;
@@ -10,6 +11,8 @@ import com.github.tools.material.MatVec2Property;
 import com.github.tools.material.MatVec3Property;
 import com.github.tools.material.MatVec4Property;
 import com.github.tools.material.MaterialSerializer;
+import com.github.tools.util.Configuration;
+import com.github.tools.util.ConfigurationBuilder;
 import com.jme3.material.MatParam;
 import com.jme3.material.Material;
 import com.jme3.material.RenderState;
@@ -34,23 +37,30 @@ import com.simsilica.lemur.style.ElementId;
  */
 public class MaterialEditorBuilder extends AbstractEditor<Material> {
     
-    private static final SpinnerFloatModel DefaultSpinnerFloatModel = new SpinnerFloatModel(-200f, 200f, 0.1f);
-    private static final SpinnerIntegerModel DefaultSpinnerIntModel = new SpinnerIntegerModel(-200, 200, 1);
+    private static final Logger log = LoggerFactory.getLogger(MaterialEditorBuilder.class);
     
-    private final String[] ignoredProperties;
+    private final Configuration config;
     
     /**
-     * @param ignoredProperties
+     * Creates a new instance of {@code MaterialEditorBuilder}.
      */
-    public MaterialEditorBuilder(String... ignoredProperties) {
-        this.ignoredProperties = ignoredProperties;
-        addConstraints(MatConstraints.getPBRConstraints());
+    public MaterialEditorBuilder() {
+        config = new ConfigurationBuilder()
+                .addConstraints(MatConstraints.getPBRConstraints());
     }
     
-    @SuppressWarnings("unchecked")
+    public MaterialEditorBuilder(Configuration config) {
+        this.config = config;
+    }
+    
+    public Configuration getConfiguration() {
+        return config;
+    }
+
+    @Override
     public Container buildPanel(Material material) {
         
-        System.out.println(MaterialSerializer.serializeToString(material));
+        log.info("\n{}", MaterialSerializer.serializeToString(material));
         
         String matDef = material.getMaterialDef().getName();
         String matName = material.getName();
@@ -95,12 +105,12 @@ public class MaterialEditorBuilder extends AbstractEditor<Material> {
 
             } else if (value instanceof Float) {
                 MatParamProperty<Float> mp = new MatParamProperty<>(name, material);
-                SpinnerModel<Float> range = constraints.getOrDefault(name, DefaultSpinnerFloatModel);
+                SpinnerModel<Float> range = getOrDefaultSpinner(name, ConfigurationBuilder.DEFAULT_SPINNER_FLOAT);
                 propertyPanel.addFloatProperty(name, mp, "value", range.getMinValue(), range.getMaxValue(), range.getStep());
 
             } else if (value instanceof Integer) {
                 MatParamProperty<Integer> mp = new MatParamProperty<>(name, material);
-                SpinnerModel<Integer> range = constraints.getOrDefault(name, DefaultSpinnerIntModel);
+                SpinnerModel<Integer> range = getOrDefaultSpinner(name, ConfigurationBuilder.DEFAULT_SPINNER_INT);
                 propertyPanel.addIntProperty(name, mp, "value", range.getMinValue(), range.getMaxValue(), range.getStep());
 
             } else if (value instanceof Boolean) {
@@ -144,16 +154,23 @@ public class MaterialEditorBuilder extends AbstractEditor<Material> {
         return container;
     }
     
+    @SuppressWarnings("unchecked")
+    private <T extends Number> SpinnerModel<T> getOrDefaultSpinner(String name, SpinnerModel<T> defaultSpinner) {
+        return config.getConstraints().getOrDefault(name, defaultSpinner);
+    }
+    
     /**
      * @param param
      * @return
      */
     private boolean ignoreProperty(MatParam param) {
         boolean ignoreProperty = false;
-        for (String ignoredProperty : ignoredProperties) {
-            if (param.getName().equalsIgnoreCase(ignoredProperty)) {
-                ignoreProperty = true;
-                break;
+        if (config.getIgnoredProperties() != null) {
+            for (String ignoredProperty : config.getIgnoredProperties()) {
+                if (param.getName().equalsIgnoreCase(ignoredProperty)) {
+                    ignoreProperty = true;
+                    break;
+                }
             }
         }
         return ignoreProperty;

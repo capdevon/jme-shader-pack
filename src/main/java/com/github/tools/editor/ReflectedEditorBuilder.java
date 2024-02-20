@@ -5,14 +5,17 @@ import java.beans.IntrospectionException;
 import java.beans.Introspector;
 import java.beans.PropertyDescriptor;
 
-import com.github.tools.SpinnerFloatModel;
-import com.github.tools.SpinnerIntegerModel;
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.github.tools.SpinnerModel;
 import com.github.tools.properties.ColorRGBAProperty;
 import com.github.tools.properties.QuaternionProperty;
 import com.github.tools.properties.Vector2Property;
 import com.github.tools.properties.Vector3Property;
 import com.github.tools.properties.Vector4Property;
+import com.github.tools.util.Configuration;
+import com.github.tools.util.ConfigurationBuilder;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.Quaternion;
 import com.jme3.math.Vector2f;
@@ -30,16 +33,23 @@ import com.simsilica.lemur.props.PropertyPanel;
  */
 public class ReflectedEditorBuilder extends AbstractEditor<Object> {
     
-    private static final SpinnerFloatModel DefaultSpinnerFloatModel = new SpinnerFloatModel(0f, 1f, 0.1f);
-    private static final SpinnerIntegerModel DefaultSpinnerIntModel = new SpinnerIntegerModel(0, 100, 1);
+    private static final Logger log = LoggerFactory.getLogger(ReflectedEditorBuilder.class);
     
-    private final String[] ignoredProperties;
+    private final Configuration config;
     
     /**
-     * @param ignoredProperties
+     * Creates a new instance of {@code ReflectedEditorBuilder}.
      */
-    public ReflectedEditorBuilder(String... ignoredProperties) {
-        this.ignoredProperties = ignoredProperties;
+    public ReflectedEditorBuilder() {
+        config = new ConfigurationBuilder();
+    }
+    
+    public ReflectedEditorBuilder(Configuration config) {
+        this.config = config;
+    }
+    
+    public Configuration getConfiguration() {
+        return config;
     }
     
     @Override
@@ -63,7 +73,7 @@ public class ReflectedEditorBuilder extends AbstractEditor<Object> {
             
             if (pd.getReadMethod() != null && pd.getWriteMethod() != null) {
 
-                System.out.printf("Inspect: %s, %s, %s, %s%n", 
+                log.debug("Inspect: {}, {}, {}, {}", 
                         pd.getPropertyType().getSimpleName(), pd.getName(), 
                         pd.getReadMethod().getName(), pd.getWriteMethod().getName());
                 
@@ -86,11 +96,11 @@ public class ReflectedEditorBuilder extends AbstractEditor<Object> {
                     container.addChild(new ColorRGBAProperty(bean, pd).buildPanel());
 
                 } else if (fieldType == float.class || fieldType == Float.class) {
-                    SpinnerModel<Float> range = constraints.getOrDefault(name, DefaultSpinnerFloatModel);
+                    SpinnerModel<Float> range = getOrDefaultSpinner(name, ConfigurationBuilder.DEFAULT_SPINNER_FLOAT);
                     propertyPanel.addFloatProperty(name, bean, name, range.getMinValue(), range.getMaxValue(), range.getStep());
 
                 } else if (fieldType == int.class || fieldType == Integer.class) {
-                    SpinnerModel<Integer> range = constraints.getOrDefault(name, DefaultSpinnerIntModel);
+                    SpinnerModel<Integer> range = getOrDefaultSpinner(name, ConfigurationBuilder.DEFAULT_SPINNER_INT);
                     propertyPanel.addIntProperty(name, bean, name, range.getMinValue(), range.getMaxValue(), range.getStep());
 
                 } else if (fieldType == boolean.class || fieldType == Boolean.class) {
@@ -100,12 +110,17 @@ public class ReflectedEditorBuilder extends AbstractEditor<Object> {
                     propertyPanel.addEnumProperty(name, bean, name);
                     
                 } else {
-                    System.err.println("Not supported yet: " + name + ", Type: " + fieldType);
+                    log.warn("Not supported yet: {}, Type: {}", name, fieldType);
                 }
             }
         }
 
         return container;
+    }
+    
+    @SuppressWarnings("unchecked")
+    private <T extends Number> SpinnerModel<T> getOrDefaultSpinner(String name, SpinnerModel<T> defaultSpinner) {
+        return config.getConstraints().getOrDefault(name, defaultSpinner);
     }
 
     /**
@@ -114,10 +129,12 @@ public class ReflectedEditorBuilder extends AbstractEditor<Object> {
      */
     private boolean ignoreProperty(PropertyDescriptor pd) {
         boolean ignoreProperty = false;
-        for (String ignoredProperty : ignoredProperties) {
-            if (pd.getName().equalsIgnoreCase(ignoredProperty)) {
-                ignoreProperty = true;
-                break;
+        if (config.getIgnoredProperties() != null) {
+            for (String ignoredProperty : config.getIgnoredProperties()) {
+                if (pd.getName().equalsIgnoreCase(ignoredProperty)) {
+                    ignoreProperty = true;
+                    break;
+                }
             }
         }
         return ignoreProperty;
