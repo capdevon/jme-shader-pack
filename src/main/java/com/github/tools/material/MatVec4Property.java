@@ -80,7 +80,7 @@ public class MatVec4Property extends MatParamProperty<Vector4f> implements MatPr
             return;
         }
 
-        if (a.length == 3) {
+        if (a.length == 4) {
             float x = Float.parseFloat(a[0]);
             float y = Float.parseFloat(a[1]);
             float z = Float.parseFloat(a[2]);
