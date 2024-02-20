@@ -5,7 +5,9 @@ import java.util.List;
 
 import com.github.shader.demo.utils.BlendLayerEffect;
 import com.github.shader.demo.utils.DebugGridState;
+import com.github.shader.demo.utils.GameObject;
 import com.github.tools.material.MatPropertyPanelBuilder;
+import com.jme3.anim.AnimComposer;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
 import com.jme3.light.AmbientLight;
@@ -33,11 +35,14 @@ import com.jme3.system.AppSettings;
 import com.jme3.texture.Texture;
 import com.jme3.texture.Texture.WrapMode;
 import com.jme3.util.mikktspace.MikktspaceTangentGenerator;
+import com.simsilica.lemur.Axis;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.DefaultRangedValueModel;
+import com.simsilica.lemur.FillMode;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.Label;
 import com.simsilica.lemur.Slider;
+import com.simsilica.lemur.component.SpringGridLayout;
 import com.simsilica.lemur.core.VersionedReference;
 import com.simsilica.lemur.style.BaseStyles;
 
@@ -47,13 +52,12 @@ import com.simsilica.lemur.style.BaseStyles;
  */
 public class Test_CharacterEffects extends SimpleApplication {
 
-    private Spatial erikaSpatial, yBotSpatial;
+    private Spatial erikaSpatial;
+    private Spatial yBotSpatial;
     
-    public BlendLayerEffect iceEffect, stoneEffect, shieldEffect;
-    
-    private List<BlendLayerEffect> activeEffectsInOrder = new ArrayList<>();
+    private List<BlendLayerEffect> lstEffects = new ArrayList<>();
     private List<Slider> blendValSliders = new ArrayList<>();
-    private List<VersionedReference> sliderVersionedReferences = new ArrayList<>();
+    private List<VersionedReference<Double>> sliderRefs = new ArrayList<>();
     
     /**
      * 
@@ -76,112 +80,15 @@ public class Test_CharacterEffects extends SimpleApplication {
 //        viewPort.setBackgroundColor(ColorRGBA.DarkGray);
         rootNode.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
 
+        initLemur(this);
         configureCamera();
         initScene();
         initFilters();
-        initLemur(this);
-        initShaderEffects();
 
         stateManager.attach(new DebugGridState());
 //        stateManager.attach(new DetailedProfilerState());
     }
 
-    /**
-     * 
-     */
-    private void initShaderEffects() {
-        iceEffect = new BlendLayerEffect("Freeze", 0, yBotSpatial);
-        iceEffect.addMaterialsFromSpatial(erikaSpatial);
-        iceEffect.setBaseColorMap(assetManager.loadTexture("Models/Cracked_Ice/DefaultMaterial_baseColor.png"));
-        iceEffect.setNormalMap(assetManager.loadTexture("Models/Cracked_Ice/DefaultMaterial_normal.png"));
-        iceEffect.setMetallicRoughnessAoMap(
-                assetManager.loadTexture("Models/Cracked_Ice/DefaultMaterial_occlusionRoughnessMetallic.png"));
-
-        stoneEffect = new BlendLayerEffect("Petrify", 1, erikaSpatial);
-        stoneEffect.addMaterialsFromSpatial(yBotSpatial);
-        stoneEffect.setBaseColorMap(assetManager.loadTexture("Models/Cracked_Stone/DefaultMaterial_baseColor.png"));
-        stoneEffect.setNormalMap(assetManager.loadTexture("Models/Cracked_Stone/DefaultMaterial_normal.png"));
-        stoneEffect.setMetallicRoughnessAoMap(
-                assetManager.loadTexture("Models/Cracked_Stone/DefaultMaterial_occlusionRoughnessMetallic.png"));
-
-        shieldEffect = new BlendLayerEffect("Shield", 2, erikaSpatial);
-        shieldEffect.addMaterialsFromSpatial(yBotSpatial);
-        shieldEffect.setBaseColorMap(assetManager.loadTexture("Models/Shield_Armor/DefaultMaterial_baseColor.png"));
-        shieldEffect.setNormalMap(assetManager.loadTexture("Models/Shield_Armor/DefaultMaterial_normal.png"));
-        shieldEffect.setMetallicRoughnessAoMap(
-                assetManager.loadTexture("Models/Shield_Armor/DefaultMaterial_occlusionRoughnessMetallic.png"));
-        shieldEffect.setEmissiveMap(assetManager.loadTexture("Models/Shield_Armor/DefaultMaterial_emissive.png"));
-        shieldEffect.setBlendAlpha(true);
-
-        registerBlendEffectToSlider(iceEffect);
-        registerBlendEffectToSlider(stoneEffect);
-        registerBlendEffectToSlider(shieldEffect);
-    }
-    
-    private void registerBlendEffectToSlider(BlendLayerEffect blendLayerEffect) {
-        activeEffectsInOrder.add(blendLayerEffect);
-
-        // make container for tweaking this blend effect 
-        // (currently only has a slider for blendVal)
-        Container blendLayerContainer = new Container();
-        Label label = new Label(blendLayerEffect.getName());
-        Slider slider = new Slider();
-        DefaultRangedValueModel sizeSliderModel = new DefaultRangedValueModel(0, 1.0, 0);
-        slider.setModel(sizeSliderModel);
-
-        blendValSliders.add(slider);
-        sliderVersionedReferences.add(sizeSliderModel.createReference());
-        
-        blendLayerContainer.addChild(label);
-        blendLayerContainer.addChild(slider);
-        
-        blendLayerContainer.setLocalTranslation(10f, settings.getHeight() - 10f, 1);
-        guiNode.attachChild(blendLayerContainer);
-    }
-
-    @Override
-    public void simpleUpdate(float tpf) {
-        
-        for (int i = 0; i < sliderVersionedReferences.size(); i++) {
-            VersionedReference sliderVersionedReference = sliderVersionedReferences.get(i);
-            Slider slider = blendValSliders.get(i);
-            if (sliderVersionedReference.update()) {
-                float val = (float) slider.getModel().getValue();
-                if (val > 1) {
-                    val = 1;
-                }
-                if (val < 0) {
-                    val = 0;
-                }
-
-                BlendLayerEffect blendEffect = activeEffectsInOrder.get(i);
-                blendEffect.setBlendValue(val);
-            }
-        }
-                    
-//        //sync all materials with the first material so params for effects are applied to whole spatial, and not just 1 material/geometry at a time
-//        Material firstMat = null;
-//        for(int i = 0; i < characterMaterials.size(); i++){
-//            if(firstMat == null){
-//                firstMat = characterMaterials.get(i);
-//            }else{
-//                Material mat = characterMaterials.get(i);
-//                
-//                ArrayList<MatParam> matParams = new ArrayList<>(firstMat.getParams());
-//                for(int p = 0; p < matParams.size(); p++){
-//                    MatParam matParam = matParams.get(p);
-//                    
-//                    if(paramsToSync.contains(matParam.getName())){
-//                        MatParam paramToCopyTo = mat.getParam(matParam.getName());
-//                        if(paramToCopyTo == null || !paramToCopyTo.getValue().equals(matParam.getValue())){
-//                            mat.setParam(matParam.getName(), matParam.getVarType(), matParam.getValue());
-//                        }                
-//                    }
-//                }
-//            }
-//        }
-    }
-    
     private void configureCamera() {
         float aspect = (float) cam.getWidth() / cam.getHeight();
         cam.setFrustumPerspective(45, aspect, 0.01f, 1000f);
@@ -195,13 +102,11 @@ public class Test_CharacterEffects extends SimpleApplication {
         GuiGlobals.initialize(app);
         BaseStyles.loadGlassStyle();
         GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
-        
-        initMaterialEditor();
     }
     
-    private void initMaterialEditor() {
+    private void initMaterialEditor(Spatial model) {
         MatPropertyPanelBuilder builder = new MatPropertyPanelBuilder();
-        Container container = builder.buildPanel(erikaSpatial);
+        Container container = builder.buildPanel(model);
         container.setLocalTranslation(settings.getWidth() - settings.getWidth() / 4f, settings.getHeight() - 10f, 1);
         guiNode.attachChild(container);
     }
@@ -211,38 +116,110 @@ public class Test_CharacterEffects extends SimpleApplication {
         addQuad(new Vector3f(0, 0, -2), Quaternion.IDENTITY, rootNode);
         addQuad(new Vector3f(0, 0, 0), new Quaternion().fromAngleAxis(-FastMath.HALF_PI, Vector3f.UNIT_X), rootNode);
 
-        yBotSpatial = assetManager.loadModel("Models/YBot/YBot.j3o");
-        erikaSpatial = assetManager.loadModel("Models/Erika/Erika.j3o");
+        yBotSpatial = loadModel("Models/YBot/YBot.j3o", new Vector3f(-1f, 0, 0), rootNode);
+        erikaSpatial = loadModel("Models/Erika/Erika.j3o", new Vector3f(1f, 0, 0), rootNode);
 
-        rootNode.attachChild(erikaSpatial);
-        rootNode.attachChild(yBotSpatial);
-
-        yBotSpatial.move(1f, 0, 0);
-        erikaSpatial.move(-1f, 0, 0);
-
-        setCorrectShader(yBotSpatial);
-        setCorrectShader(erikaSpatial);
+//        setCharacterShader(yBotSpatial); // FIXME: ???
+//        setCharacterShader(erikaSpatial); // FIXME: ???
+        
+        initMaterialEditor(erikaSpatial);
+        initShaderEffects();
+    }
+    
+    private Spatial loadModel(String asset, Vector3f position, Node parent) {
+        Spatial model = assetManager.loadModel(asset);
+        model.setLocalTranslation(position);
+        parent.attachChild(model);
+        
+        AnimComposer animComposer = GameObject.getComponentInChildren(model, AnimComposer.class);
+        String clipName = animComposer.getAnimClipsNames().toArray(new String[0])[0];
+        animComposer.setCurrentAction(clipName);
+        
+        return model;
     }
 
-    private void setCorrectShader(Spatial spatial) {
+    private void setCharacterShader(Spatial spatial) {
         spatial.breadthFirstTraversal(new SceneGraphVisitorAdapter() {
             @Override
             public void visit(Geometry geom) {
                 Material oldMat = geom.getMaterial();
-                Material characterMat = new Material(assetManager, "MatDefs/PBRCharacters.j3md");
+                Material newMat = new Material(assetManager, "MatDefs/PBRCharacters.j3md");
 
                 List<MatParam> matParams = new ArrayList<>(oldMat.getParams());
-                for (int p = 0; p < matParams.size(); p++) {
-                    MatParam matParam = matParams.get(p);
+                for (MatParam matParam : matParams) {
                     if (matParam.getValue() != null) {
-                        Object val = matParam.getValue();
-                        characterMat.setParam(matParam.getName(), matParam.getVarType(), val);
+                        newMat.setParam(matParam.getName(), matParam.getVarType(), matParam.getValue());
                     }
                 }
-                geom.setMaterial(characterMat);
+                geom.setMaterial(newMat);
                 MikktspaceTangentGenerator.generate(geom);
             }
         });
+    }
+    
+    /**
+     */
+    private void initShaderEffects() {
+        BlendLayerEffect ice = new BlendLayerEffect("Freeze", 0, yBotSpatial);
+        ice.addMaterialsFromSpatial(erikaSpatial);
+        ice.setBaseColorMap(assetManager.loadTexture("Models/Cracked_Ice/DefaultMaterial_baseColor.png"));
+        ice.setNormalMap(assetManager.loadTexture("Models/Cracked_Ice/DefaultMaterial_normal.png"));
+        ice.setMetallicRoughnessAoMap(
+                assetManager.loadTexture("Models/Cracked_Ice/DefaultMaterial_occlusionRoughnessMetallic.png"));
+
+        BlendLayerEffect stone = new BlendLayerEffect("Petrify", 1, erikaSpatial);
+        stone.addMaterialsFromSpatial(yBotSpatial);
+        stone.setBaseColorMap(assetManager.loadTexture("Models/Cracked_Stone/DefaultMaterial_baseColor.png"));
+        stone.setNormalMap(assetManager.loadTexture("Models/Cracked_Stone/DefaultMaterial_normal.png"));
+        stone.setMetallicRoughnessAoMap(
+                assetManager.loadTexture("Models/Cracked_Stone/DefaultMaterial_occlusionRoughnessMetallic.png"));
+
+        BlendLayerEffect shield = new BlendLayerEffect("Shield", 2, erikaSpatial);
+        shield.addMaterialsFromSpatial(yBotSpatial);
+        shield.setBaseColorMap(assetManager.loadTexture("Models/Shield_Armor/DefaultMaterial_baseColor.png"));
+        shield.setNormalMap(assetManager.loadTexture("Models/Shield_Armor/DefaultMaterial_normal.png"));
+        shield.setMetallicRoughnessAoMap(
+                assetManager.loadTexture("Models/Shield_Armor/DefaultMaterial_occlusionRoughnessMetallic.png"));
+        shield.setEmissiveMap(assetManager.loadTexture("Models/Shield_Armor/DefaultMaterial_emissive.png"));
+        shield.setBlendAlpha(true);
+
+        registerBlendEffects(ice, stone, shield);
+    }
+    
+    private void registerBlendEffects(BlendLayerEffect... effects) {
+        Container container = new Container(new SpringGridLayout(Axis.Y, Axis.X, FillMode.None, FillMode.Even));
+        
+        for (BlendLayerEffect effect : effects) {
+            Label label = new Label(effect.getName());
+            Slider slider = new Slider();
+            DefaultRangedValueModel sliderModel = new DefaultRangedValueModel(0, 1.0, 0);
+            slider.setModel(sliderModel);
+
+            lstEffects.add(effect);
+            blendValSliders.add(slider);
+            sliderRefs.add(sliderModel.createReference());
+
+            container.addChild(label);
+            container.addChild(slider);
+        }
+        
+        container.setLocalTranslation(10f, settings.getHeight() - 10f, 1);
+        guiNode.attachChild(container);
+    }
+
+    @Override
+    public void simpleUpdate(float tpf) {
+        for (int i = 0; i < sliderRefs.size(); i++) {
+            VersionedReference<Double> sliderRef = sliderRefs.get(i);
+            Slider slider = blendValSliders.get(i);
+            if (sliderRef.update()) {
+                float val = (float) slider.getModel().getValue();
+                val = FastMath.clamp(val, 0.0f, 1.0f);
+
+                BlendLayerEffect effect = lstEffects.get(i);
+                effect.setBlendValue(val);
+            }
+        }
     }
     
     /**
@@ -269,9 +246,12 @@ public class Test_CharacterEffects extends SimpleApplication {
         DirectionalLight sun = new DirectionalLight();
         sun.setDirection(new Vector3f(-1, -1, -1).normalizeLocal());
         rootNode.addLight(sun);
+        
+        AmbientLight al = new AmbientLight(new ColorRGBA(1.2f, 1.2f, 1.3f, 0.0f));
+        rootNode.addLight(al);
 
         // add a PBR probe.
-        Spatial probeModel = assetManager.loadModel("Scenes/defaultProbe.j3o");
+        Spatial probeModel = assetManager.loadModel("LightProbes/defaultProbe.j3o");
         LightProbe lightProbe = (LightProbe) probeModel.getLocalLightList().get(0);
         lightProbe.getArea().setRadius(100);
         rootNode.addLight(lightProbe);
@@ -283,13 +263,13 @@ public class Test_CharacterEffects extends SimpleApplication {
         dlsr.setShadowIntensity(0.65f);
         viewPort.addProcessor(dlsr);
 
-        AmbientLight al = new AmbientLight(new ColorRGBA(1.2f, 1.2f, 1.3f, 0.0f));
-//        rootNode.addLight(al);
-
         FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
         viewPort.addProcessor(fpp);
 
-        BloomFilter bloom = new BloomFilter(BloomFilter.GlowMode.Objects);
+        /**
+         * for PBR, you need to use GlowMode.Scene in the BloomFilter
+         */
+        BloomFilter bloom = new BloomFilter(BloomFilter.GlowMode.Scene);
         bloom.setBloomIntensity(5.0f);
         fpp.addFilter(bloom);
 
