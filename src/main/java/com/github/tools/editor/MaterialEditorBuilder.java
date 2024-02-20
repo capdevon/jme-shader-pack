@@ -78,7 +78,6 @@ public class MaterialEditorBuilder extends AbstractEditor<Material> {
         for (int i = 0; i < numParams; i++) {
 
             MatParam param = material.getParamsMap().getValue(i);
-            System.out.println("MatParam: " + param);
             
             if (ignoreProperty(param)) {
                 continue;
