@@ -56,6 +56,14 @@ uniform float m_Metallic;
 #ifdef AO_STRENGTH
     uniform float m_AoStrength;
 #endif
+
+// Specular-AA
+#ifdef SPECULAR_AA_SCREEN_SPACE_VARIANCE
+    uniform float m_SpecularAASigma;
+#endif
+#ifdef SPECULAR_AA_THRESHOLD
+    uniform float m_SpecularAAKappa;
+#endif
   
 #if defined(NORMALMAP) || defined(PARALLAXMAP)
     uniform sampler2D m_NormalMap;       
@@ -71,7 +79,8 @@ uniform float m_Metallic;
     uniform float m_StaticSunIntensity;
 #endif
 
-void readMatParamsAndTextures(in mat3 tbnMat, in vec3 vViewDir, inout vec4 albedo, inout float Metallic, inout float Roughness, inout vec4 SpecularColor, inout float glossiness, inout vec3 lightMapColor, inout vec3 ao, inout vec3 normal, inout vec4 emissive, inout float alpha){
+//void readMatParamsAndTextures(in mat3 tbnMat, in vec3 vViewDir, inout vec4 albedo, inout float Metallic, inout float Roughness, inout vec4 SpecularColor, inout float glossiness, inout vec3 lightMapColor, inout vec3 ao, inout vec3 normal, inout vec4 emissive, inout float alpha){
+void readMatParamsAndTextures(){
     #if (defined(PARALLAXMAP) || (defined(NORMALMAP_PARALLAX) && defined(NORMALMAP)))
         #ifdef STEEP_PARALLAX
             #ifdef NORMALMAP_PARALLAX

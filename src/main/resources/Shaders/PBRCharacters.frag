@@ -19,8 +19,6 @@ varying vec4 wTangent;
     uniform int m_DebugValuesMode;
 #endif
 
-#import "ShaderLib/PBRLightingParamsReader.glsllib"
-#import "ShaderLib/PBRLighting.glsllib"
 // It is important that these 2 glsllibs are referenced AFTER the other variables above have been declared. 
 // The above variables are declared here (rather than in a glsllib) to reduce redundancy, since these variables are likely to be used by more than one glsllib.
 // Only lighting variables are declared in PBRLighting.glsllib, and only basic PBR material params are declared in PBRLightingParamsReader.glsllib.
@@ -48,26 +46,39 @@ float Roughness = 0.0;
 vec4 specularColor;
 float glossiness = 0.0;
 
+vec3 norm;
+vec3 normal;
+vec3 viewDir;
+
+mat3 tbnMat;
+vec3 vViewDir;
+
+#import "ShaderLib/PBRLightingParamsReader.glsllib"
+#import "ShaderLib/PBRLighting.glsllib"
+
 void main(){
     
-    vec3 norm = normalize(wNormal);
-    vec3 normal = norm.xyz;
-    vec3 viewDir = normalize(g_CameraPosition - wPosition);
+    norm = normalize(wNormal);
+    normal = norm.xyz;
+    viewDir = normalize(g_CameraPosition - wPosition);
 
     // Note: These are intentionally not surrounded by ifDefs relating to normal and parallax maps being defined, because
     // other .glsllibs may require normal or parallax mapping even if the base model does not have those maps
     vec3 tan = normalize(wTangent.xyz);
-    mat3 tbnMat = mat3(tan, wTangent.w * cross( (norm), (tan)), norm); 
-    vec3 vViewDir =  viewDir * tbnMat;                                 
+    tbnMat = mat3(tan, wTangent.w * cross( (norm), (tan)), norm); 
+    vViewDir =  viewDir * tbnMat;                                 
 
     //base PBR params and tex reads:
-    readMatParamsAndTextures(tbnMat, vViewDir, albedo, Metallic, Roughness, specularColor, glossiness, lightMapColor, ao, normal, emissive, alpha);
+     readMatParamsAndTextures();
+  //  readMatParamsAndTextures(tbnMat, vViewDir, albedo, Metallic, Roughness, specularColor, glossiness, lightMapColor, ao, normal, emissive, alpha);
     
     
     applyAllBlendEffects(albedo, normal, Roughness, Metallic, ao, emissive, glossiness, newTexCoord, wPosition, norm, tbnMat);
     
     // Lighting calculation:    
-    vec3 finalLightingValue = calculatePBRLighting(albedo, Metallic, Roughness, specularColor, glossiness, lightMapColor, ao, indoorSunLightExposure, normal, norm, viewDir);
+  //  vec3 finalLightingValue = calculatePBRLighting(albedo, Metallic, Roughness, specularColor, glossiness, lightMapColor, ao, indoorSunLightExposure, normal, norm, viewDir);
+    vec3 finalLightingValue = calculatePBRLighting();
+    
     gl_FragColor.rgb += finalLightingValue;
 
     //apply final emissive value after lighting

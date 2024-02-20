@@ -22,15 +22,9 @@ uniform vec4 g_AmbientLightColor;
     uniform mat4 g_LightProbeData3;
 #endif
 
-// Specular-AA
-#ifdef SPECULAR_AA_SCREEN_SPACE_VARIANCE
-    uniform float m_SpecularAASigma;
-#endif
-#ifdef SPECULAR_AA_THRESHOLD
-    uniform float m_SpecularAAKappa;
-#endif
 
-vec3 calculatePBRLighting(in vec4 albedo, in float Metallic, in float Roughness, in vec4 specularColor, in float glossiness, in vec3 lightMapColor, in vec3 ao, in float indoorSunLightExposure, in vec3 normal, in vec3 norm, in vec3 viewDir){
+vec3 calculatePBRLighting(){
+//vec3 calculatePBRLighting(in vec4 albedo, in float Metallic, in float Roughness, in vec4 specularColor, in float glossiness, in vec3 lightMapColor, in vec3 ao, in float indoorSunLightExposure, in vec3 normal, in vec3 norm, in vec3 viewDir){
     vec3 finalLightingValue;
     
     #ifdef SPECGLOSSPIPELINE
