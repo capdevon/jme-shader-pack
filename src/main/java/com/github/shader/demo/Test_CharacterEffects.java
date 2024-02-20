@@ -87,7 +87,7 @@ public class Test_CharacterEffects extends SimpleApplication {
         initScene();
         initFilters();
 
-        stateManager.attach(new DebugGridState());
+//        stateManager.attach(new DebugGridState());
 //        stateManager.attach(new DetailedProfilerState());
     }
 
@@ -250,7 +250,7 @@ public class Test_CharacterEffects extends SimpleApplication {
         rootNode.addLight(sun);
         
         AmbientLight al = new AmbientLight(new ColorRGBA(1.2f, 1.2f, 1.3f, 0.0f));
-        rootNode.addLight(al);
+        //rootNode.addLight(al);
 
         // add a PBR probe.
         Spatial probeModel = assetManager.loadModel("LightProbes/defaultProbe.j3o");
@@ -273,7 +273,7 @@ public class Test_CharacterEffects extends SimpleApplication {
          */
         BloomFilter bloom = new BloomFilter(BloomFilter.GlowMode.Scene);
         bloom.setBloomIntensity(5.0f);
-        fpp.addFilter(bloom);
+        //fpp.addFilter(bloom);
 
         FXAAFilter fxaa = new FXAAFilter();
         fpp.addFilter(fxaa);
