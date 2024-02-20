@@ -204,6 +204,9 @@ public class Test_Hologram2 extends SimpleApplication implements ActionListener 
         dlsf.setEdgeFilteringMode(EdgeFilteringMode.PCFPOISSON);
         fpp.addFilter(dlsf);
 
+        /**
+         * for PBR, you need to use GlowMode.Scene in the BloomFilter
+         */
         BloomFilter bloom = new BloomFilter(BloomFilter.GlowMode.Scene);
         bloom.setBloomIntensity(5.0f);
         fpp.addFilter(bloom);
