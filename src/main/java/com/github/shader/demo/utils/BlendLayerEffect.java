@@ -20,6 +20,7 @@ public class BlendLayerEffect {
     private String name;
     private int layerIndex = -1;
     private String layerParamsPrefix;
+    private float blendValue = 0;
     private final Vector4f blendVec = new Vector4f();
     private final List<Material> materials = new ArrayList<>();
     // remove these and instead loop through all params of the first in the list of
@@ -30,36 +31,33 @@ public class BlendLayerEffect {
     private Texture emissiveMap;
     private boolean isTriplanar = true;
 
-    public String getName() {
-        return name;
-    }
-
-    public float getBlendVar() {
-        return blendVec.x;
-    }
-
-    public BlendLayerEffect(int layerIndex, List<Material> materials) {
-        this(null, layerIndex, materials);
-    }
-
-    public BlendLayerEffect(int layerIndex, Spatial spatial) {
-        this(null, layerIndex, spatial);
-    }
-
     public BlendLayerEffect(String name, int layerIndex, List<Material> materials) {
-        setName(name);
+        this.name = name;
         setLayerIndex(layerIndex);
         this.materials.addAll(materials);
     }
 
     public BlendLayerEffect(String name, int layerIndex, Spatial spatial) {
-        setName(name);
+        this.name = name;
         setLayerIndex(layerIndex);
         addMaterialsFromSpatial(spatial);
     }
+    
+    public String getName() {
+        return name;
+    }
 
-    public void setBlendValue(float blendVal) {
-        blendVec.setX(blendVal);
+    public void setName(String name) {
+        this.name = name;
+    }
+
+    public float getBlendValue() {
+        return blendValue;
+    }
+
+    public void setBlendValue(float blendValue) {
+        this.blendValue = blendValue;
+        blendVec.x = blendValue;
     }
 
     public void clearLayer() {
@@ -160,13 +158,6 @@ public class BlendLayerEffect {
     public void setEmissiveMap(Texture texture) {
         emissiveMap = texture;
         setParam(layerParamsPrefix + "_EmissiveMap", VarType.Texture2D, texture);
-    }
-
-    public void setName(String name) {
-        if (name == null) {
-            name = "";
-        }
-        this.name = name;
     }
 
     public void setBlendAlpha(boolean boo) {
