@@ -29,7 +29,7 @@ public class BlendLayerEffect {
     private Texture normalMap;
     private Texture metallicRoughnessAoMap;
     private Texture emissiveMap;
-    private boolean isTriplanar = true;
+    private boolean triplanar = true;
 
     public BlendLayerEffect(String name, int layerIndex, List<Material> materials) {
         this.name = name;
@@ -90,13 +90,6 @@ public class BlendLayerEffect {
         if (material != null && material.getMaterialDef().getMaterialParam(blendVecMatParamString) != null) {
             if (!materials.contains(material)) {
                 materials.add(material);
-
-                // if this isn't the first material added, copy all params from the first
-                // material to the newly registered one
-                if (materials.size() > 1) {
-                    // Material
-                }
-
                 material.setVector4(blendVecMatParamString, blendVec);
             }
         }
@@ -110,9 +103,13 @@ public class BlendLayerEffect {
             }
         });
     }
+    
+    public boolean isTriplanar() {
+        return triplanar;
+    }
 
-    public void setTriplanar(boolean isTriplanar) {
-        this.isTriplanar = isTriplanar;
+    public void setTriplanar(boolean triplanar) {
+        this.triplanar = triplanar;
         if (baseColorMap != null) {
             baseColorMap.setWrap(Texture.WrapMode.Repeat);
         }
@@ -132,7 +129,7 @@ public class BlendLayerEffect {
             if (val == null || (val instanceof Boolean && ((Boolean) val == false))) {
                 mat.clearParam(name);
             } else {
-                if (val instanceof Texture && isTriplanar) {
+                if (val instanceof Texture && triplanar) {
                     ((Texture) val).setWrap(Texture.WrapMode.Repeat);
                 }
                 mat.setParam(name, varType, val);
