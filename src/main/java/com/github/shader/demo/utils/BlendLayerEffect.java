@@ -68,7 +68,7 @@ public class BlendLayerEffect {
         }
 
         this.layerIndex = layerIndex;
-        layerParamsPrefix = "BlendLayer_" + layerIndex;
+        this.layerParamsPrefix = "BlendLayer_" + layerIndex;
 
         for (Material mat : materials) {
             mat.setVector4(layerParamsPrefix + "_BlendVec", blendVec);
@@ -85,12 +85,12 @@ public class BlendLayerEffect {
     }
     
     private void registerMaterial(Material mat) {
-        String blendVecMatParamString = "BlendLayer_" + layerIndex + "_BlendVec";
+        String paramName = "BlendLayer_" + layerIndex + "_BlendVec";
         // detect if the material's matDef is valid and has support for the blend layer
-        if (mat != null && mat.getMaterialDef().getMaterialParam(blendVecMatParamString) != null) {
+        if (mat.getMaterialDef().getMaterialParam(paramName) != null) {
             if (!materials.contains(mat)) {
                 materials.add(mat);
-                mat.setVector4(blendVecMatParamString, blendVec);
+                mat.setVector4(paramName, blendVec);
             }
         }
     }
