@@ -67,7 +67,7 @@ public class MaterialEditorBuilder extends AbstractEditor<Material> {
 
         Container container = new Container(new SpringGridLayout(Axis.Y, Axis.X, FillMode.None, FillMode.Even));
         container.addChild(createLabelValue("Material Def:", matDef));
-        container.addChild(createLabelValue("Material Name:", matName));
+        //container.addChild(createLabelValue("Material Name:", matName));
 
         PropertyPanel propertyPanel = container.addChild(new PropertyPanel("glass"));
 
