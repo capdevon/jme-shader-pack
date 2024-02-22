@@ -90,7 +90,6 @@ public class Test_CharacterEffects2 extends SimpleApplication {
         setupSky();
         initFilters();
         loadModel();
-        initMaterialEditor();
         initKeys();
         
         stateManager.attach(new BlendEffectState(model));
@@ -197,14 +196,6 @@ public class Test_CharacterEffects2 extends SimpleApplication {
         GuiGlobals.initialize(app);
         BaseStyles.loadGlassStyle();
         GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
-    }
-
-    private void initMaterialEditor() {
-//        MatPropertyPanelBuilder builder = new MatPropertyPanelBuilder(StringFilterMode.IgnoreStartingWith,
-//                "BlendLayer");
-//        Container container = builder.buildPanel(model);
-//        container.setLocalTranslation(settings.getWidth() - settings.getWidth() / 4f, settings.getHeight() - 10f, 1);
-//        guiNode.attachChild(container);
     }
 
     /**
