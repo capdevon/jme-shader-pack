@@ -97,10 +97,6 @@ public class Test_CharacterEffects2 extends SimpleApplication {
         stateManager.attach(new DebugGridState());
     }
 
-    @Override
-    public void simpleUpdate(float tpf) {
-    }
-
     private void configureCamera() {
         float aspect = (float) cam.getWidth() / cam.getHeight();
         cam.setFrustumPerspective(45, aspect, 0.01f, 1000f);

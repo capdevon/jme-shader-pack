@@ -4,6 +4,7 @@ import java.util.ArrayList;
 
 import com.github.tools.SpinnerFloatModel;
 import com.github.tools.editor.ReflectedEditorBuilder;
+import com.github.tools.material.MatPropertyPanelBuilder;
 import com.github.tools.util.ConfigurationBuilder;
 import com.jme3.app.Application;
 import com.jme3.app.SimpleApplication;
@@ -58,6 +59,7 @@ public class BlendEffectState extends BaseAppState implements ActionListener {
         
         setCharacterShader(model);
         initEffects();
+        initMaterialEditor(model);
         initKeys();
     }
 
@@ -79,6 +81,13 @@ public class BlendEffectState extends BaseAppState implements ActionListener {
     
     private Node getGuiNode() {
         return ((SimpleApplication) getApplication()).getGuiNode();
+    }
+    
+    private void initMaterialEditor(Spatial model) {
+        MatPropertyPanelBuilder builder = new MatPropertyPanelBuilder();
+        Container container = builder.buildPanel(model);
+        container.setLocalTranslation(getSettings().getWidth() * 0.7f, getSettings().getHeight() - 10f, 1);
+        getGuiNode().attachChild(container);
     }
     
     private void setCharacterShader(Spatial spatial) {

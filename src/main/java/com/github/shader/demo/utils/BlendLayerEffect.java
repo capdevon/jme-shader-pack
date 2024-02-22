@@ -23,19 +23,11 @@ public class BlendLayerEffect {
     private float blendValue = 0;
     private final Vector4f blendVec = new Vector4f();
     private final List<Material> materials = new ArrayList<>();
-    // remove these and instead loop through all params of the first in the list of
-    // Materials for copy/pasting to newly registered mats
     private Texture baseColorMap;
     private Texture normalMap;
     private Texture metallicRoughnessAoMap;
     private Texture emissiveMap;
     private boolean triplanar = true;
-
-    public BlendLayerEffect(String name, int layerIndex, List<Material> materials) {
-        this.name = name;
-        setLayerIndex(layerIndex);
-        this.materials.addAll(materials);
-    }
 
     public BlendLayerEffect(String name, int layerIndex, Spatial spatial) {
         this.name = name;
@@ -62,8 +54,7 @@ public class BlendLayerEffect {
 
     public void clearLayer() {
         for (Material mat : materials) {
-            ArrayList<MatParam> matParams = new ArrayList<>(mat.getParams());
-            for (MatParam matParam : matParams) {
+            for (MatParam matParam : mat.getParams()) {
                 if (matParam.getName().startsWith(layerParamsPrefix)) {
                     mat.clearParam(matParam.getName());
                 }
@@ -84,24 +75,24 @@ public class BlendLayerEffect {
         }
     }
 
-    public void registerMaterial(Material material) {
-        String blendVecMatParamString = "BlendLayer_" + layerIndex + "_BlendVec";
-        // detect if the material's matDef is valid and has support for the blend layer
-        if (material != null && material.getMaterialDef().getMaterialParam(blendVecMatParamString) != null) {
-            if (!materials.contains(material)) {
-                materials.add(material);
-                material.setVector4(blendVecMatParamString, blendVec);
-            }
-        }
-    }
-
-    public void addMaterialsFromSpatial(Spatial spatial) {
+    private void addMaterialsFromSpatial(Spatial spatial) {
         spatial.breadthFirstTraversal(new SceneGraphVisitorAdapter() {
             @Override
             public void visit(Geometry geom) {
                 registerMaterial(geom.getMaterial());
             }
         });
+    }
+    
+    private void registerMaterial(Material mat) {
+        String blendVecMatParamString = "BlendLayer_" + layerIndex + "_BlendVec";
+        // detect if the material's matDef is valid and has support for the blend layer
+        if (mat != null && mat.getMaterialDef().getMaterialParam(blendVecMatParamString) != null) {
+            if (!materials.contains(mat)) {
+                materials.add(mat);
+                mat.setVector4(blendVecMatParamString, blendVec);
+            }
+        }
     }
     
     public boolean isTriplanar() {
@@ -126,7 +117,7 @@ public class BlendLayerEffect {
 
     public void setParam(String name, VarType varType, Object val) {
         for (Material mat : materials) {
-            if (val == null || (val instanceof Boolean && ((Boolean) val == false))) {
+            if (val == null || (val instanceof Boolean && (!(Boolean) val))) {
                 mat.clearParam(name);
             } else {
                 if (val instanceof Texture && triplanar) {
@@ -157,7 +148,7 @@ public class BlendLayerEffect {
         setParam(layerParamsPrefix + "_EmissiveMap", VarType.Texture2D, texture);
     }
 
-    public void setBlendAlpha(boolean boo) {
-        setParam(layerParamsPrefix + "_BlendAlpha", VarType.Boolean, boo);
+    public void setBlendAlpha(boolean alpha) {
+        setParam(layerParamsPrefix + "_BlendAlpha", VarType.Boolean, alpha);
     }
 }
