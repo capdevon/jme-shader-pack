@@ -1,5 +1,6 @@
 package com.github.tools.material;
 
+import com.github.tools.properties.PropertyItem;
 import com.jme3.material.Material;
 import com.jme3.shader.VarType;
 
@@ -7,7 +8,7 @@ import com.jme3.shader.VarType;
  * 
  * @author capdevon
  */
-public class MatParamProperty<T> {
+public class MatParamProperty<T> implements PropertyItem<T> {
 
     private T value;
     private final String name;
@@ -23,11 +24,13 @@ public class MatParamProperty<T> {
         return name;
     }
 
+    @Override
     public void setValue(T value) {
         this.value = value;
         material.setParam(name, getVarType(), value);
     }
 
+    @Override
     public T getValue() {
         return material.getParamValue(name);
     }

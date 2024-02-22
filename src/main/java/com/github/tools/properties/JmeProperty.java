@@ -8,7 +8,7 @@ import com.simsilica.lemur.Panel;
  * 
  * @author capdevon
  */
-public abstract class JmeProperty<T> implements ReflectedItem<T> {
+public abstract class JmeProperty<T> implements PropertyItem<T> {
 
     private Object bean;
     private PropertyDescriptor pd;

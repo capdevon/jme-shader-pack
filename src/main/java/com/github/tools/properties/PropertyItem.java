@@ -1,6 +1,6 @@
 package com.github.tools.properties;
 
-public interface ReflectedItem<T> {
+public interface PropertyItem<T> {
 
     T getValue();
 
