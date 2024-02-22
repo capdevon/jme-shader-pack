@@ -19,7 +19,7 @@ public class BlendLayerEffect {
 
     private String name;
     private int layerIndex = -1;
-    private String layerParamsPrefix;
+    private String blendLayerPrefixedName;
     private float blendValue = 0;
     private final Vector4f blendVec = new Vector4f();
     private final List<Material> materials = new ArrayList<>();
@@ -52,26 +52,26 @@ public class BlendLayerEffect {
         blendVec.x = blendValue;
     }
 
-    public void clearLayer() {
+    private void clearLayer() {
         for (Material mat : materials) {
             for (MatParam matParam : mat.getParams()) {
-                if (matParam.getName().startsWith(layerParamsPrefix)) {
+                if (matParam.getName().startsWith(blendLayerPrefixedName)) {
                     mat.clearParam(matParam.getName());
                 }
             }
         }
     }
 
-    public void setLayerIndex(int layerIndex) {
+    private void setLayerIndex(int layerIndex) {
         if (layerIndex != -1) {
             clearLayer();
         }
 
         this.layerIndex = layerIndex;
-        this.layerParamsPrefix = "BlendLayer_" + layerIndex;
+        this.blendLayerPrefixedName = "BlendLayer_" + layerIndex;
 
         for (Material mat : materials) {
-            mat.setVector4(layerParamsPrefix + "_BlendVec", blendVec);
+            mat.setVector4(blendLayerPrefixedName + "_BlendVec", blendVec);
         }
     }
 
@@ -85,7 +85,7 @@ public class BlendLayerEffect {
     }
     
     private void registerMaterial(Material mat) {
-        String paramName = "BlendLayer_" + layerIndex + "_BlendVec";
+        String paramName = blendLayerPrefixedName + "_BlendVec";
         // detect if the material's matDef is valid and has support for the blend layer
         if (mat.getMaterialDef().getMaterialParam(paramName) != null) {
             if (!materials.contains(mat)) {
@@ -115,40 +115,67 @@ public class BlendLayerEffect {
         }
     }
 
-    public void setParam(String name, VarType varType, Object val) {
+    public void setParam(String name, VarType varType, Object value) {
         for (Material mat : materials) {
-            if (val == null || (val instanceof Boolean && (!(Boolean) val))) {
+            
+            if (value == null) {
                 mat.clearParam(name);
-            } else {
-                if (val instanceof Texture && triplanar) {
-                    ((Texture) val).setWrap(Texture.WrapMode.Repeat);
-                }
-                mat.setParam(name, varType, val);
+                continue;
+            }
+            
+            switch (varType) {
+                case Boolean:
+                    Boolean bool = (Boolean) value;
+                    if (!bool) {
+                        mat.clearParam(name);
+                    } else {
+                        mat.setParam(name, varType, value);
+                    }
+                    break;
+                    
+                case Texture2D:
+                    if (triplanar) {
+                        Texture texture = (Texture) value;
+                        texture.setWrap(Texture.WrapMode.Repeat);
+                    }
+                    mat.setParam(name, varType, value);
+                    break;
+                    
+                default:
+                    mat.setParam(name, varType, value);
             }
         }
+    }
+    
+    /**
+     * The specified value must be between -1 and 5
+     * @param debugMode
+     */
+    public void setDebugValuesMode(int debugMode) {
+        setParam("DebugValuesMode", VarType.Int, debugMode);
     }
 
     public void setBaseColorMap(Texture texture) {
         baseColorMap = texture;
-        setParam(layerParamsPrefix + "_BaseColorMap", VarType.Texture2D, texture);
+        setParam(blendLayerPrefixedName + "_BaseColorMap", VarType.Texture2D, texture);
     }
 
     public void setNormalMap(Texture texture) {
         normalMap = texture;
-        setParam(layerParamsPrefix + "_NormalMap", VarType.Texture2D, texture);
+        setParam(blendLayerPrefixedName + "_NormalMap", VarType.Texture2D, texture);
     }
 
     public void setMetallicRoughnessAoMap(Texture texture) {
         metallicRoughnessAoMap = texture;
-        setParam(layerParamsPrefix + "_MetallicRoughnessAoMap", VarType.Texture2D, texture);
+        setParam(blendLayerPrefixedName + "_MetallicRoughnessAoMap", VarType.Texture2D, texture);
     }
 
     public void setEmissiveMap(Texture texture) {
         emissiveMap = texture;
-        setParam(layerParamsPrefix + "_EmissiveMap", VarType.Texture2D, texture);
+        setParam(blendLayerPrefixedName + "_EmissiveMap", VarType.Texture2D, texture);
     }
 
     public void setBlendAlpha(boolean alpha) {
-        setParam(layerParamsPrefix + "_BlendAlpha", VarType.Boolean, alpha);
+        setParam(blendLayerPrefixedName + "_BlendAlpha", VarType.Boolean, alpha);
     }
 }

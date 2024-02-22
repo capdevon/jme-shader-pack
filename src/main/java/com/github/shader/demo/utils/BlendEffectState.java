@@ -22,8 +22,8 @@ import com.jme3.scene.Geometry;
 import com.jme3.scene.Node;
 import com.jme3.scene.SceneGraphVisitorAdapter;
 import com.jme3.scene.Spatial;
-import com.jme3.shader.VarType;
 import com.jme3.system.AppSettings;
+import com.jme3.util.mikktspace.MikktspaceTangentGenerator;
 import com.simsilica.lemur.Axis;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.FillMode;
@@ -102,7 +102,7 @@ public class BlendEffectState extends BaseAppState implements ActionListener {
                     }
                 }
                 geom.setMaterial(newMat);
-                //MikktspaceTangentGenerator.generate(geom);
+                MikktspaceTangentGenerator.generate(geom);
             }
         });
     }
@@ -190,7 +190,7 @@ public class BlendEffectState extends BaseAppState implements ActionListener {
             if (shaderDebugMode > 5) {
                 shaderDebugMode = -1;
             }
-            ice.setParam("DebugValuesMode", VarType.Int, shaderDebugMode);
+            ice.setDebugValuesMode(shaderDebugMode);
             debugText.setText("Shader Debug Mode: " + shaderDebugMode);
 
         } else if (name.equals("ToggleShaderDebugMode_Normals")) {
@@ -199,7 +199,7 @@ public class BlendEffectState extends BaseAppState implements ActionListener {
             } else {
                 shaderDebugMode = 1;
             }
-            ice.setParam("DebugValuesMode", VarType.Int, shaderDebugMode);
+            ice.setDebugValuesMode(shaderDebugMode);
             debugText.setText("Shader Debug Mode: " + shaderDebugMode);
         }
     }

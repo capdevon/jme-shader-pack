@@ -48,7 +48,6 @@ public class Test_CharacterEffects2 extends SimpleApplication {
      *
      * @param args
      */
-
     public static void main(String[] args) {
         Test_CharacterEffects2 app = new Test_CharacterEffects2();
         AppSettings settings = new AppSettings(true);
