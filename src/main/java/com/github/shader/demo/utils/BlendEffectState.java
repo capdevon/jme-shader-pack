@@ -1,7 +1,5 @@
 package com.github.shader.demo.utils;
 
-import java.util.ArrayList;
-
 import com.github.tools.SpinnerFloatModel;
 import com.github.tools.editor.ReflectedEditorBuilder;
 import com.github.tools.material.MatPropertyPanelBuilder;
@@ -26,7 +24,6 @@ import com.jme3.scene.SceneGraphVisitorAdapter;
 import com.jme3.scene.Spatial;
 import com.jme3.shader.VarType;
 import com.jme3.system.AppSettings;
-import com.jme3.util.mikktspace.MikktspaceTangentGenerator;
 import com.simsilica.lemur.Axis;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.FillMode;
@@ -85,6 +82,8 @@ public class BlendEffectState extends BaseAppState implements ActionListener {
     
     private void initMaterialEditor(Spatial model) {
         MatPropertyPanelBuilder builder = new MatPropertyPanelBuilder();
+        builder.setIgnoreParamFilter(mp -> mp.getName().startsWith("BlendLayer"));
+        
         Container container = builder.buildPanel(model);
         container.setLocalTranslation(getSettings().getWidth() * 0.7f, getSettings().getHeight() - 10f, 1);
         getGuiNode().attachChild(container);
@@ -97,8 +96,7 @@ public class BlendEffectState extends BaseAppState implements ActionListener {
                 Material oldMat = geom.getMaterial();
                 Material newMat = new Material(assetManager, "MatDefs/PBRCharacters.j3md");
 
-                ArrayList<MatParam> matParams = new ArrayList<>(oldMat.getParams());
-                for (MatParam matParam : matParams) {
+                for (MatParam matParam : oldMat.getParams()) {
                     if (matParam.getValue() != null) {
                         newMat.setParam(matParam.getName(), matParam.getVarType(), matParam.getValue());
                     }
@@ -111,24 +109,24 @@ public class BlendEffectState extends BaseAppState implements ActionListener {
     
     private void initEffects() {
 
+        String dirName = "Models/Cracked_Ice/DefaultMaterial_";
         ice = new BlendLayerEffect("Freeze", 0, model);
-        ice.setBaseColorMap(assetManager.loadTexture("Models/Cracked_Ice/DefaultMaterial_baseColor.png"));
-        ice.setNormalMap(assetManager.loadTexture("Models/Cracked_Ice/DefaultMaterial_normal.png"));
-        ice.setMetallicRoughnessAoMap(
-                assetManager.loadTexture("Models/Cracked_Ice/DefaultMaterial_occlusionRoughnessMetallic.png"));
+        ice.setBaseColorMap(assetManager.loadTexture(dirName + "baseColor.png"));
+        ice.setNormalMap(assetManager.loadTexture(dirName + "normal.png"));
+        ice.setMetallicRoughnessAoMap(assetManager.loadTexture(dirName + "occlusionRoughnessMetallic.png"));
 
+        dirName = "Models/Cracked_Stone/DefaultMaterial_";
         stone = new BlendLayerEffect("Petrify", 1, model);
-        stone.setBaseColorMap(assetManager.loadTexture("Models/Cracked_Stone/DefaultMaterial_baseColor.png"));
-        stone.setNormalMap(assetManager.loadTexture("Models/Cracked_Stone/DefaultMaterial_normal.png"));
-        stone.setMetallicRoughnessAoMap(
-                assetManager.loadTexture("Models/Cracked_Stone/DefaultMaterial_occlusionRoughnessMetallic.png"));
+        stone.setBaseColorMap(assetManager.loadTexture(dirName + "baseColor.png"));
+        stone.setNormalMap(assetManager.loadTexture(dirName + "normal.png"));
+        stone.setMetallicRoughnessAoMap(assetManager.loadTexture(dirName + "occlusionRoughnessMetallic.png"));
 
+        dirName = "Models/Shield_Armor/DefaultMaterial_";
         shield = new BlendLayerEffect("Shield", 2, model);
-        shield.setBaseColorMap(assetManager.loadTexture("Models/Shield_Armor/DefaultMaterial_baseColor.png"));
-        shield.setNormalMap(assetManager.loadTexture("Models/Shield_Armor/DefaultMaterial_normal.png"));
-        shield.setMetallicRoughnessAoMap(
-                assetManager.loadTexture("Models/Shield_Armor/DefaultMaterial_occlusionRoughnessMetallic.png"));
-        shield.setEmissiveMap(assetManager.loadTexture("Models/Shield_Armor/DefaultMaterial_emissive.png"));
+        shield.setBaseColorMap(assetManager.loadTexture(dirName + "baseColor.png"));
+        shield.setNormalMap(assetManager.loadTexture(dirName + "normal.png"));
+        shield.setMetallicRoughnessAoMap(assetManager.loadTexture(dirName + "occlusionRoughnessMetallic.png"));
+        shield.setEmissiveMap(assetManager.loadTexture(dirName + "emissive.png"));
         shield.setBlendAlpha(true);
 
         registerEffects(ice, stone, shield);
@@ -146,7 +144,7 @@ public class BlendEffectState extends BaseAppState implements ActionListener {
 
             RollupPanel rollup = new RollupPanel(effect.getName(), panel, "glass");
             rollup.setAlpha(0, false);
-            rollup.setOpen(false);
+            rollup.setOpen(true);
             container.addChild(rollup);
         }
 
