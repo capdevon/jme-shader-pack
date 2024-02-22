@@ -1,7 +1,16 @@
 package com.github.tools.material;
 
+import java.util.HashSet;
+import java.util.Set;
+import java.util.function.Predicate;
+
+import org.slf4j.Logger;
+import org.slf4j.LoggerFactory;
+
 import com.github.tools.editor.MaterialEditorBuilder;
 import com.github.tools.util.ConfigurationBuilder;
+import com.jme3.material.MatParam;
+import com.jme3.material.Material;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.SceneGraphVisitorAdapter;
 import com.jme3.scene.Spatial;
@@ -18,6 +27,14 @@ import com.simsilica.lemur.component.SpringGridLayout;
  */
 public class MatPropertyPanelBuilder {
     
+    private static final Logger log = LoggerFactory.getLogger(MatPropertyPanelBuilder.class);
+    
+    private Predicate<MatParam> ignoreParamFilter;
+
+    public void setIgnoreParamFilter(Predicate<MatParam> ignoreParamFilter) {
+        this.ignoreParamFilter = ignoreParamFilter;
+    }
+
     public Container buildPanel(Spatial spatial) {
 
         Container container = new Container(new SpringGridLayout(Axis.Y, Axis.X, FillMode.None, FillMode.Even));
@@ -34,12 +51,24 @@ public class MatPropertyPanelBuilder {
                 System.out.println("MeshMode: " + geom.getMesh().getMode());
 
                 String title = geom.toString();
+                Material material = geom.getMaterial();
+                
+                Set<String> ignoredProperties = new HashSet<>();
+                if (ignoreParamFilter != null) {
+                    for (MatParam param : material.getParams()) {
+                        if (ignoreParamFilter.test(param)) {
+                            log.debug("Ignore Properties: {}", param);
+                            ignoredProperties.add(param.getName());
+                        }
+                    }
+                }
                 
                 ConfigurationBuilder config = new ConfigurationBuilder();
+                config.setIgnoredProperties(ignoredProperties.toArray(new String[0]));
                 config.addConstraints(MatConstraints.getPBRConstraints());
                 
                 MaterialEditorBuilder builder = new MaterialEditorBuilder(config);
-                Panel panel = builder.buildPanel(geom.getMaterial());
+                Panel panel = builder.buildPanel(material);
                 
                 RollupPanel rollup = new RollupPanel(title, panel, "glass");
                 rollup.setAlpha(0, false);
