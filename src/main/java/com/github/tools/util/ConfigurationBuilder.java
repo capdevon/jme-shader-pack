@@ -15,8 +15,8 @@ import com.github.tools.SpinnerModel;
  */
 public class ConfigurationBuilder implements Configuration {
 
-    public static final SpinnerFloatModel DEFAULT_SPINNER_FLOAT = new SpinnerFloatModel(-200f, 200f, 0.1f);
-    public static final SpinnerIntegerModel DEFAULT_SPINNER_INT = new SpinnerIntegerModel(-200, 200, 1);
+    public static final SpinnerFloatModel DEFAULT_SPINNER_FLOAT = new SpinnerFloatModel(0f, 1f, 0.1f);
+    public static final SpinnerIntegerModel DEFAULT_SPINNER_INT = new SpinnerIntegerModel(0, 10, 1);
 
     private String[] ignoredProperties;
     private Map<String, SpinnerModel> constraints;
