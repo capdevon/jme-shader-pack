@@ -1,17 +1,21 @@
 
+
+
 //support up to 6 blend layers. can easily modify your shader to use more by increasing this value and adding the extra defines to support them
 #for i=0..6 ( $0 )
     #ifdef BLENDLAYER_$i    
         uniform vec4 m_BlendLayer_$i_BlendVec; //note that this needs to be a vec4 to store all possible blending vals that change every frame, as to avoid the lag from changing a float parm every frame
     
         uniform vec4 m_BlendLayer_$i_BaseColor; 
+        uniform vec3 m_BlendLayer_$i_HSVScalar;
         uniform float m_BlendLayer_$i_NormalIntensity; 
 
         uniform float m_BlendLayer_$i_Roughness;
         uniform float m_BlendLayer_$i_Metallic;    
+        uniform float m_BlendLayer_$i_AoStrength;    
         
         uniform vec4 m_BlendLayer_$i_EmissiveColor;
-        uniform float m_BlendLayer_$i_EmissivePower;
+        uniform float m_BlendLayer_$i_EmissiveIntensity;
         
         #ifdef BLENDLAYER_$i_HEIGHTBLENDMODE
             uniform float floorHeightPercent; //if this is (for example) 0.2f
@@ -45,11 +49,30 @@
     #endif
 #endfor 
 
+vec3 rgb2hsv(vec3 c){
+    vec4 K = vec4(0.0, -1.0 / 3.0, 2.0 / 3.0, -1.0);
+    vec4 p = mix(vec4(c.bg, K.wz), vec4(c.gb, K.xy), step(c.b, c.g));
+    vec4 q = mix(vec4(p.xyw, c.r), vec4(c.r, p.yzx), step(p.x, c.r));
+
+    float d = q.x - min(q.w, q.y);
+    float e = 1.0e-10;
+    return vec3(abs(q.z + (q.w - q.y) / (6.0 * d + e)), d / (q.x + e), q.x);
+}
+
+vec3 hsv2rgb(vec3 c){
+    vec4 K = vec4(1.0, 2.0 / 3.0, 1.0 / 3.0, 3.0);
+    vec3 p = abs(fract(c.xxx + K.xyz) * 6.0 - K.www);
+    return c.z * mix(K.xxx, clamp(p - K.xxx, 0.0, 1.0), c.y);
+}
 
 vec4 getTriPlanarBlend(in vec3 coords, in vec3 blending, in sampler2D map, in float scale) {
       vec4 col1 = texture2D( map, coords.yz * scale);
       vec4 col2 = texture2D( map, coords.xz * scale);
       vec4 col3 = texture2D( map, coords.xy * scale); 
+      
+      col1.xyz = (col1.xyz * vec3(2.0, 2.0, 2.0) - vec3(1.0, 1.0, 1.0)) * vec3(1.0).xyz;
+      col2.xyz = (col2.xyz * vec3(2.0, 2.0, 2.0) - vec3(1.0, 1.0, 1.0)) * vec3(1.0).xyz;
+      col3.xyz = (col3.xyz * vec3(2.0, 2.0, 2.0) - vec3(1.0, 1.0, 1.0)) * vec3(1.0).xyz;
       // blend the results of the 3 planar projections.
       vec4 tex = col1 * blending.x + col2 * blending.y + col3 * blending.z;
       
@@ -71,14 +94,15 @@ void blendLayer(in int layerIndex, inout vec4 albedo, inout float Roughness, ino
 
 
 vec3 rnmBlendUnpacked(vec3 n1, vec3 n2){
-    n1 += vec3( 0,  0, 1);
-    n2 *= vec3(-1, -1, 1);
+    n1 += vec3( 0.0,  0.0, 1.0);
+    n2 *= vec3(-1.0, -1.0, 1.0);
     return n1*dot(n1, n2)/n1.z - n2;
 }
 
 
 vec3 calculateBetterTriplanar(in vec3 blend, in vec3 worldNormal, in vec3 worldPos, in sampler2D map, in float scale) {
 
+    float normalScale = 1.0;
 
         // Triplanar uvs
     vec2 uvX = worldPos.zy; // x facing plane
@@ -89,11 +113,13 @@ vec3 calculateBetterTriplanar(in vec3 blend, in vec3 worldNormal, in vec3 worldP
     vec3 tnormalY = texture2D(map, uvY * scale).xyz;
     vec3 tnormalZ = texture2D(map, uvZ * scale).xyz;
     
-      float normalScale = -1.0;
-      
-    tnormalX = normalize((tnormalX.xyz * vec3(2.0, 2.0, 2.0) - vec3(1.0, 1.0, 1.0)) * vec3(normalScale, normalScale, 1.0));
-    tnormalY = normalize((tnormalY.xyz * vec3(2.0, 2.0, 2.0) - vec3(1.0, 1.0, 1.0)) * vec3(normalScale, normalScale, 1.0));
-    tnormalZ = normalize((tnormalZ.xyz * vec3(2.0, 2.0, 2.0) - vec3(1.0, 1.0, 1.0)) * vec3(normalScale, normalScale, 1.0));
+    tnormalX.xy *= vec2(normalScale);
+    tnormalY.xy *= vec2(normalScale);
+    tnormalZ.xy *= vec2(normalScale);
+     
+  //  tnormalX = normalize((tnormalX.xyz * vec3(2.0, 2.0, 2.0) - vec3(1.0, 1.0, 1.0)) * vec3(normalScale, normalScale, 1.0));
+  //  tnormalY = normalize((tnormalY.xyz * vec3(2.0, 2.0, 2.0) - vec3(1.0, 1.0, 1.0)) * vec3(normalScale, normalScale, 1.0));
+  //  tnormalZ = normalize((tnormalZ.xyz * vec3(2.0, 2.0, 2.0) - vec3(1.0, 1.0, 1.0)) * vec3(normalScale, normalScale, 1.0));
     
     // Get absolute value of normal to ensure positive tangent "z" for blend
     vec3 absVertNormal = abs(worldNormal);
@@ -150,8 +176,8 @@ void applyAllBlendEffects(inout vec4 albedo, inout vec3 normal, inout float Roug
     
     //glossiness wlil be converted to roughness by just doing:
     
-    #ifdef SPECCCC_GLOSSS
-        Roughness = 1 - glossiness;
+    #ifdef SPECGLOSSPIPELINE
+        Roughness = 1.0 - glossiness;
     #endif
         
     vec3 blending = abs( norm );
@@ -167,7 +193,7 @@ void applyAllBlendEffects(inout vec4 albedo, inout vec3 normal, inout float Roug
 
    // blending = abs(normalize(wPosition));
     
-    float triScale = 1.0;
+    float triScale = 0.5;
     
     vec3 blend = blending;
     
@@ -175,91 +201,191 @@ void applyAllBlendEffects(inout vec4 albedo, inout vec3 normal, inout float Roug
     vec3 newNormal;    
     float blendPercent, newRoughness, newMetallic, newAo;
     
-    float newAlpha = 1.0;
+    float newAlpha;
+    
+    float modelHeight = 2.0;
+    float modelYPos = 0.0;
+
+    float minHeightWorld = 0.0;
+    float maxHeightWorld = blendPercent * 2.0;
+    
+    float noiseVal;
+    
+    float dissolveBlendPercent;
+    
+    float heightScanLowerPercent;
+    float heighScanUpperPercent;
+        
+  //  albedo.xyz = vec3(0.9,0.92,0.96);
 
     #for i=0..6 ( $0 )
-    
     
       //  blendLayer($i, albedo, Roughness, Metallic, ao);
     
         #ifdef BLENDLAYER_$i    
-        
-             blendPercent = m_BlendLayer_$i_BlendVec.x;
+            newAlbedo = vec4(1.0);
+            newEmissive = vec4(1.0);
+            packedMetallicRoughnessAoVec.rgb = vec3(1.0);
+            blendPercent = 0.0;
+            newRoughness = 1.0;
+            newMetallic = 1.0;
+            newAo = 1.0;
+            noiseVal = 0.0;    
+            newAlpha = 1.0;
+            newNormal = normal;
+
+            blendPercent = m_BlendLayer_$i_BlendVec.x;
+            heightScanLowerPercent = m_BlendLayer_$i_BlendVec.y;
+            heighScanUpperPercent = m_BlendLayer_$i_BlendVec.z;
+            dissolveBlendPercent = m_BlendLayer_$i_BlendVec.w;
+             
+             
+             
+             // --- height blending wip:
+             
+
+            minHeightWorld = 0.0; //add minHeightOffset from blendVec.y eventually
+            maxHeightWorld = heighScanUpperPercent * modelHeight; // and blendVec.z here for maxHeightScan                    
+
+            if(wPosition.y < maxHeightWorld){
+               blendPercent *= 1.0; 
+            }else{
+               blendPercent = 0.0;
+            }
+
+             // ---
+             
+             //dissolve ---
+
+             //hard coded noise inputs currently... add params for multiple layers of noise with custom frequency and amplitude eventually
+            noiseVal = Noise3D(scaledModelPos, 0.123) + 0.00001 ;
+            
+            if(dissolveBlendPercent > noiseVal){
+                
+                blendPercent*= 1.0;
+                //discard;
+            }else{
+                blendPercent = 0.0;
+            }
+
+            //---
+
 
             #ifdef BLENDLAYER_$i_BASECOLORMAP
-             //   vec4 newAlbedo = texture2D(m_BlendLayer_$i_BaseColorMap, texCoord);
-                newAlbedo = calculateBetterTriplanarColor(wPosition, blending, m_BlendLayer_$i_BaseColorMap, triScale);
-                newAlpha = newAlbedo.a;
-                
-                #ifdef BLENDLAYER_$i_BLENDALPHA
-                    blendPercent *= newAlpha;
+                #ifdef BLENDLAYER_$i_TRIPLANAR    
+                    newAlbedo = calculateBetterTriplanarColor(wPosition, blending, m_BlendLayer_$i_BaseColorMap, triScale);
+                #else
+                    newAlbedo = texture2D(m_BlendLayer_$i_BaseColorMap, texCoord);
                 #endif
-               
-                
-                albedo = mix(albedo, newAlbedo, blendPercent);
-                
-                
-                if(newAlpha <  0.001){
-                 //   discard;
+            #endif
+            
+            //modify albedo color in HSV space (does nothing if default value for m_BlendLayer_$i_HSVScalar is left as 1,1,1)
+            newAlbedo.rgb = rgb2hsv(newAlbedo.rgb).rgb; //could probably put this HSV scaling in an #ifdef once this shader is running on a newer version of jme that supports >64 defines per shader. but for now have to be conservative with defines
+            
+            newAlbedo.x += m_BlendLayer_$i_HSVScalar.x;         //modify hue
+            newAlbedo.y += m_BlendLayer_$i_HSVScalar.y ;       //modify saturation
+            newAlbedo.z += m_BlendLayer_$i_HSVScalar.z;       //modify value(brightness)
+            
+            #ifdef BLENDLAYER_$i_COLORCYCLEEFFECT
+                if(m_ColorCycleEffectVector.x > 0){
+                    newAlbedo.x += (g_Time * m_ColorCycleEffectVector.x); // cycle through all hues of color for fancy effect        
+                }
+                if(m_ColorCycleEffectVector.y > 0){
+                    newAlbedo.y = mod((g_Time * m_ColorCycleEffectVector.y) + 1, 1); //scale saturation over time for fancy effect     
+                }
+                if(m_ColorCycleEffectVector.z > 0){
+                    newAlbedo.z = mod((g_Time * m_ColorCycleEffectVector.z) + 1, 1); //scale brithness over time for fancy effect
                 }
             #endif
+
+            newAlbedo.x = mod(newAlbedo.x + 1, 1);  //keep hue values in range of 0-1 in cases where added values makes it over 1
+
+
+            // max and min all final HSV values to be between 0-1
+            newAlbedo.x = max(newAlbedo.x, 0.0);
+            newAlbedo.x = min(newAlbedo.x, 1.0);
+
+            newAlbedo.y = max(newAlbedo.y, 0.0);
+            newAlbedo.y = min(newAlbedo.y, 1.0);
+
+            newAlbedo.z = max(newAlbedo.z, 0.0);
+            newAlbedo.z = min(newAlbedo.z, 1.0);
+
+            //convert back to RGB and set albedo's new color
+            newAlbedo.rgb = hsv2rgb(newAlbedo.rgb).rgb;
+            
+            //multiply the regular color param after applying hsv, that way you can use full desaturation in HSV space then multiply by a color for more precise color selections 
+            newAlbedo *= m_BlendLayer_$i_BaseColor;
+            
+            newAlpha = newAlbedo.a;
+            
+            #ifdef BLENDLAYER_$i_BLENDALPHA
+                blendPercent *= newAlpha; //use alpha layer as multiplier for blend value
+            #else    
+                
+            #endif
+            
+            albedo = mix(albedo, newAlbedo, blendPercent);    
+            alpha = mix(alpha, newAlpha, blendPercent);
+            
+
             
             #ifdef BLENDLAYER_$i_NORMALMAP
-            
-                #ifdef BLENDLAYER_$i_TRIPLANAR
-                 
-                    newNormal = calculateBetterTriplanar(blend, wNormal, wPosition, m_BlendLayer_$i_NormalMap, triScale).xyz; //using triplanar mapping
-                    
-
-                //    newNormal = normalize((newNormal.xyz * vec3(2.0, 2.0, 2.0) - vec3(1.0, 1.0, 1.0))) * vec3(1.0);
-                  //  newNormal = calculateTangentsAndApplyToNormals(newNormal, norm);
-                    
-              //      newNormal = normalize(wNormal + newNormal);
+                #ifdef BLENDLAYER_$i_TRIPLANAR    
                 
-              //      newNormal = normalize(tbnMat * newNormal);
+                    newNormal = getTriPlanarBlend(wPosition, blend, m_BlendLayer_$i_NormalMap, triScale ).xyz;
+             //       newNormal = normalize((newNormal.xyz * vec3(2.0, 2.0, 2.0) - vec3(1.0, 1.0, 1.0))) * vec3(1.0);
+                    newNormal = normalize(tbnMat * newNormal);       //currently broken...
                     
                 #else
-                    newNormal = texture2D(m_BlendLayer_$i_NormalMap, texCoord).xyz; //using original texCoord value
+                    newNormal = texture2D(m_BlendLayer_$i_NormalMap, texCoord).xyz; //non triplanar use for pre-made texture atlases
                     newNormal = normalize((newNormal.xyz * vec3(2.0,  2.0, 2.0) - vec3(1.0, NORMAL_TYPE * 1.0, 1.0)));
-                    newNormal = normalize(tbnMat * newNormal);
+                    newNormal = normalize(tbnMat * newNormal);                    
                 #endif
-                
-                normal = mix(normal, newNormal, blendPercent);
-                
-                
-                
             #endif
+            normal = mix(normal, newNormal, blendPercent);     
+            
+            
+            newRoughness = m_BlendLayer_$i_Roughness;
+            newMetallic = m_BlendLayer_$i_Metallic;
+            newAo = m_BlendLayer_$i_AoStrength;
             
             #ifdef BLENDLAYER_$i_METALLICROUGHNESSAOMAP
-           //     vec4 packedMetallicRoughnessAoVec = texture2D(m_BlendLayer_$i_MetallicRoughnessAoMap, texCoord);
-                
-                packedMetallicRoughnessAoVec = calculateBetterTriplanarColor(wPosition, blending, m_BlendLayer_$i_MetallicRoughnessAoMap, triScale);
-
-                newRoughness = packedMetallicRoughnessAoVec.g;
-                newMetallic = packedMetallicRoughnessAoVec.b;
-                newAo = packedMetallicRoughnessAoVec.r;
-
-                Roughness = mix(Roughness, newRoughness, blendPercent);
-                Metallic = mix(Metallic, newMetallic, blendPercent);
-                ao.rgb = mix(ao.rgb, vec3(newAo), blendPercent);
-                
-         //       Roughness = 1.0;
-         //       Metallic = 0.0;
-
+                #ifdef BLENDLAYER_$i_TRIPLANAR             
+                    packedMetallicRoughnessAoVec = calculateBetterTriplanarColor(wPosition, blending, m_BlendLayer_$i_MetallicRoughnessAoMap, triScale);
+                #else
+                    packedMetallicRoughnessAoVec = texture2D(m_BlendLayer_$i_MetallicRoughnessAoMap, texCoord);
+                #endif
+                newRoughness *= packedMetallicRoughnessAoVec.g;
+                newMetallic *= packedMetallicRoughnessAoVec.b;
+                newAo *= packedMetallicRoughnessAoVec.r;
             #endif
             
-            #ifdef BLENDLAYER_$i_EMISSIVEMAP
+            Roughness = mix(Roughness, newRoughness, blendPercent);
+            Metallic = mix(Metallic, newMetallic, blendPercent);
+            ao.rgb = mix(ao.rgb, vec3(newAo), blendPercent);
+
+            #ifdef BLENDLAYER_$i_EMISSIVEMAP            
+                #ifdef BLENDLAYER_$i_TRIPLANAR     
+                    newEmissive = calculateBetterTriplanarColor(wPosition, blending, m_BlendLayer_$i_EmissiveMap, triScale); 
+                #else
+                    newEmissive = texture2D(m_BlendLayer_$i_EmissiveMap, texCoord);
+                #endif
+            #endif        
             
-                newEmissive = calculateBetterTriplanarColor(wPosition, blending, m_BlendLayer_$i_EmissiveMap, triScale); 
-                newEmissive*= vec4(1.6);
-                emissive = mix(emissive, newEmissive, blendPercent);
-            #endif
+            newEmissive *= m_BlendLayer_$i_EmissiveColor;            
+            newEmissive *= m_BlendLayer_$i_EmissiveIntensity;
+            
+            emissive = mix(emissive, newEmissive, blendPercent);
+            
         #endif
     
     #endfor
     
+        if(alpha < 0.001){
+            discard;
+        }
     
     //convert roughness back to glossiness in case spec gloss is being used by the main shader:
-    glossiness = 1 - Roughness;
+    glossiness = 1.0 - Roughness;
 }
-
