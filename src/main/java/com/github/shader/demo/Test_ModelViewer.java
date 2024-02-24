@@ -3,7 +3,7 @@ package com.github.shader.demo;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import com.github.shader.demo.utils.DebugGridState;
+import com.github.shader.demo.states.DebugGridState;
 import com.github.shader.demo.utils.GameObject;
 import com.github.tools.material.MatPropertyPanelBuilder;
 import com.jme3.anim.AnimComposer;
@@ -32,6 +32,7 @@ import com.jme3.scene.debug.custom.ArmatureDebugAppState;
 import com.jme3.shadow.DirectionalLightShadowFilter;
 import com.jme3.shadow.EdgeFilteringMode;
 import com.jme3.system.AppSettings;
+import com.jme3.util.MaterialDebugAppState;
 import com.jme3.util.SkyFactory;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.GuiGlobals;
@@ -65,12 +66,17 @@ public class Test_ModelViewer extends SimpleApplication {
    private AnimComposer animComposer;
    private SkinningControl skinningControl;
    private ArmatureDebugAppState armatureDebugState;
+   private MaterialDebugAppState matDebugState;
    private final Queue<String> animsQueue = new LinkedList<>();
 
    @Override
    public void simpleInitApp() {
        armatureDebugState = new ArmatureDebugAppState();
        stateManager.attach(armatureDebugState);
+       
+       matDebugState = new MaterialDebugAppState();
+       stateManager.attach(matDebugState);
+       
        stateManager.attach(new DebugGridState());
        
        hud = makeLabelUI("", ColorRGBA.Blue, guiNode);
@@ -200,7 +206,7 @@ public class Test_ModelViewer extends SimpleApplication {
        addMapping("Speed+", new KeyTrigger(KeyInput.KEY_U));
        addMapping("Speed-", new KeyTrigger(KeyInput.KEY_I));
        addMapping("Next", new KeyTrigger(KeyInput.KEY_N));
-       addMapping("ToggleArmature", new KeyTrigger(KeyInput.KEY_M));
+       addMapping("ToggleArmature", new KeyTrigger(KeyInput.KEY_H));
    }
 
    private void addMapping(String mappingName, Trigger... triggers) {
@@ -225,13 +231,18 @@ public class Test_ModelViewer extends SimpleApplication {
                hud.setText(anim);
                
            } else if (name.equals("Speed+")) {
-               float glSpeed = animComposer.getGlobalSpeed();
-               animComposer.setGlobalSpeed(glSpeed + 0.1f);
-               
+               float animSpeed = animComposer.getGlobalSpeed();
+               if (animSpeed > 2.0f) {
+                   animSpeed = 2;
+               }
+               animComposer.setGlobalSpeed(animSpeed + 0.1f);
+
            } else if (name.equals("Speed-")) {
-               float glSpeed = animComposer.getGlobalSpeed();
-               animComposer.setGlobalSpeed(glSpeed - 0.1f);
-               
+               float animSpeed = animComposer.getGlobalSpeed();
+               if (animSpeed < 0.0f)
+                   animSpeed = 0;
+               animComposer.setGlobalSpeed(animSpeed - 0.1f);
+
            } else if (name.equals("ToggleArmature")) {
                armatureDebugState.setEnabled(!armatureDebugState.isEnabled());
            }
