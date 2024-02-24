@@ -22,6 +22,7 @@ import com.jme3.post.FilterPostProcessor;
 import com.jme3.post.filters.BloomFilter;
 import com.jme3.post.filters.ColorOverlayFilter;
 import com.jme3.post.filters.FXAAFilter;
+import com.jme3.post.filters.ToneMapFilter;
 import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.Mesh;
@@ -194,28 +195,29 @@ public class Test_Hologram2 extends SimpleApplication implements ActionListener 
 //        dlsr.setLight(sun);
 //        viewPort.addProcessor(dlsr);
 
-        FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
-        viewPort.addProcessor(fpp);
-        
         DirectionalLightShadowFilter dlsf = new DirectionalLightShadowFilter(assetManager, 4096, 3);
         dlsf.setLight(sun);
         dlsf.setShadowIntensity(0.4f);
         dlsf.setShadowZExtend(256);
         dlsf.setEdgeFilteringMode(EdgeFilteringMode.PCFPOISSON);
-        fpp.addFilter(dlsf);
 
         /**
          * for PBR, you need to use GlowMode.Scene in the BloomFilter
          */
         BloomFilter bloom = new BloomFilter(BloomFilter.GlowMode.Scene);
         bloom.setBloomIntensity(5.0f);
-        fpp.addFilter(bloom);
 
+        ToneMapFilter toneMap = new ToneMapFilter(Vector3f.UNIT_XYZ.mult(4.0f));
         FXAAFilter fxaa = new FXAAFilter();
-        fpp.addFilter(fxaa);
-        
         ColorOverlayFilter overlay = new ColorOverlayFilter();
+        
+        FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
+        fpp.addFilter(toneMap);
+        fpp.addFilter(bloom);
+        fpp.addFilter(dlsf);
+        fpp.addFilter(fxaa);
         fpp.addFilter(overlay);
+        viewPort.addProcessor(fpp);
     }
 
     @Override
