@@ -1,4 +1,4 @@
-package com.github.shader.demo.utils;
+package com.github.shader.demo.states;
 
 import com.jme3.app.Application;
 import com.jme3.app.state.BaseAppState;
