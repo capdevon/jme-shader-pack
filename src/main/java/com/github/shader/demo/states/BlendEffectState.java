@@ -38,15 +38,6 @@ public class BlendEffectState extends MySimpleState {
         initMaterialEditor(model);
     }
 
-    private void initMaterialEditor(Spatial model) {
-        MatPropertyPanelBuilder builder = new MatPropertyPanelBuilder();
-        builder.setIgnoreParamFilter(mp -> mp.getName().startsWith("BlendLayer"));
-        
-        Container container = builder.buildPanel(model);
-        container.setLocalTranslation(settings.getWidth() * 0.75f, settings.getHeight() - 10f, 1);
-        guiNode.attachChild(container);
-    }
-    
     private void setCharacterShader(Spatial spatial) {
         spatial.breadthFirstTraversal(new SceneGraphVisitorAdapter() {
             @Override
@@ -113,6 +104,15 @@ public class BlendEffectState extends MySimpleState {
         }
 
         container.setLocalTranslation(10f, settings.getHeight() - 40f, 1);
+        guiNode.attachChild(container);
+    }
+    
+    private void initMaterialEditor(Spatial spatial) {
+        MatPropertyPanelBuilder builder = new MatPropertyPanelBuilder();
+        builder.setIgnoreParamFilter(mp -> mp.getName().startsWith("BlendLayer"));
+        
+        Container container = builder.buildPanel(spatial);
+        container.setLocalTranslation(settings.getWidth() * 0.75f, settings.getHeight() - 10f, 1);
         guiNode.attachChild(container);
     }
     
