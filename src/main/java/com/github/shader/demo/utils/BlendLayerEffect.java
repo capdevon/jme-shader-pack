@@ -1,15 +1,17 @@
 package com.github.shader.demo.utils;
 
+import java.util.ArrayList;
+import java.util.List;
+
 import com.jme3.material.MatParam;
 import com.jme3.material.Material;
+import com.jme3.math.ColorRGBA;
 import com.jme3.math.Vector4f;
 import com.jme3.scene.Geometry;
 import com.jme3.scene.SceneGraphVisitorAdapter;
 import com.jme3.scene.Spatial;
 import com.jme3.shader.VarType;
 import com.jme3.texture.Texture;
-import java.util.ArrayList;
-import java.util.List;
 
 /**
  *
@@ -18,17 +20,34 @@ import java.util.List;
 public class BlendLayerEffect {
 
     private String name;
+    private int debugMode = -1;
     private int layerIndex = -1;
     private String blendLayerPrefixedName;
-    private float blendValue = 0;
-    private final Vector4f blendVec = new Vector4f();
+    private final Vector4f blendVec = new Vector4f(0.0f, 0.0f, 1.0f, 1.0f);
     private final List<Material> materials = new ArrayList<>();
     private Texture baseColorMap;
     private Texture normalMap;
     private Texture metallicRoughnessAoMap;
     private Texture emissiveMap;
     private boolean triplanar = true;
+    
+    private float heighScanUpperVal = 1f;
+    private float heightScanLowerVal = 0f;
+    private float dissolveBlendVal = 1f;
+    private float linearBlendVal = 0f;
+    private float emissiveIntensity = 0f;
+    private final ColorRGBA emissiveColor = new ColorRGBA();
+    
+    private boolean blendAlpha = false;
+    private final ColorRGBA baseColor = new ColorRGBA();
 
+    /**
+     * Creates a BlendLayerEffect.
+     * 
+     * @param name
+     * @param layerIndex
+     * @param spatial
+     */
     public BlendLayerEffect(String name, int layerIndex, Spatial spatial) {
         this.name = name;
         setLayerIndex(layerIndex);
@@ -41,15 +60,6 @@ public class BlendLayerEffect {
 
     public void setName(String name) {
         this.name = name;
-    }
-
-    public float getBlendValue() {
-        return blendValue;
-    }
-
-    public void setBlendValue(float blendValue) {
-        this.blendValue = blendValue;
-        blendVec.x = blendValue;
     }
 
     private void clearLayer() {
@@ -101,6 +111,8 @@ public class BlendLayerEffect {
 
     public void setTriplanar(boolean triplanar) {
         this.triplanar = triplanar;
+        setParam(blendLayerPrefixedName + "_TriPlanar", VarType.Boolean, triplanar);
+        
         if (baseColorMap != null) {
             baseColorMap.setWrap(Texture.WrapMode.Repeat);
         }
@@ -147,14 +159,6 @@ public class BlendLayerEffect {
         }
     }
     
-    /**
-     * The specified value must be between -1 and 5
-     * @param debugMode
-     */
-    public void setDebugValuesMode(int debugMode) {
-        setParam("DebugValuesMode", VarType.Int, debugMode);
-    }
-
     public void setBaseColorMap(Texture texture) {
         baseColorMap = texture;
         setParam(blendLayerPrefixedName + "_BaseColorMap", VarType.Texture2D, texture);
@@ -175,7 +179,88 @@ public class BlendLayerEffect {
         setParam(blendLayerPrefixedName + "_EmissiveMap", VarType.Texture2D, texture);
     }
 
-    public void setBlendAlpha(boolean alpha) {
-        setParam(blendLayerPrefixedName + "_BlendAlpha", VarType.Boolean, alpha);
+    public boolean isBlendAlpha() {
+        return blendAlpha;
+    }
+
+    public void setBlendAlpha(boolean blendAlpha) {
+        this.blendAlpha = blendAlpha;
+        this.setParam(blendLayerPrefixedName + "_BlendAlpha", VarType.Boolean, blendAlpha);
+    }
+    
+    public float getEmissiveIntensity() {
+        return emissiveIntensity;
+    }
+
+    public void setEmissiveIntensity(float emissiveIntensity) {
+        this.emissiveIntensity = emissiveIntensity;
+        this.setParam(blendLayerPrefixedName + "_EmissiveIntensity", VarType.Float, emissiveIntensity);
+    }
+
+    public ColorRGBA getEmissiveColor() {
+        return emissiveColor;
+    }
+    
+    public void setEmissiveColor(ColorRGBA emissiveColor) {
+        this.emissiveColor.set(emissiveColor);
+        this.setParam(blendLayerPrefixedName + "_EmissiveColor", VarType.Vector4, emissiveColor);
+    }
+    
+    public ColorRGBA getBaseColor() {
+        return baseColor;
+    }
+
+    public void setBaseColor(ColorRGBA baseColor) {
+        this.baseColor.set(baseColor);
+        this.setParam(blendLayerPrefixedName + "_BaseColor", VarType.Vector4, baseColor);
+    }
+    
+    public int getDebugMode() {
+        return debugMode;
+    }
+    
+    /**
+     * The specified value must be between -1 and 5
+     * @param debugMode
+     */
+    public void setDebugMode(int debugMode) {
+        this.debugMode = debugMode;
+        setParam("DebugValuesMode", VarType.Int, debugMode);
+    }
+
+    public float getLinearBlendVal() {
+        return linearBlendVal;
+    }
+
+    public void setLinearBlendVal(float linearBlendVal) {
+        this.linearBlendVal = linearBlendVal;
+        blendVec.x = linearBlendVal;
+    }
+    
+    public float getHeightScanLowerVal() {
+        return heightScanLowerVal;
+    }
+    
+    public void setHeightScanLowerVal(float heightScanLowerVal) {
+        this.heightScanLowerVal = heightScanLowerVal;
+        blendVec.y = heightScanLowerVal;
+    }
+
+    public float getHeighScanUpperVal() {
+        return heighScanUpperVal;
+    }
+
+    public void setHeighScanUpperVal(float heighScanUpperVal) {
+        this.heighScanUpperVal = heighScanUpperVal;
+        blendVec.z = heighScanUpperVal;
+    }
+
+    public float getDissolveBlendVal() {
+        return dissolveBlendVal;
+    }
+
+    public void setDissolveBlendVal(float dissolveBlendVal) {
+        this.dissolveBlendVal = dissolveBlendVal;
+        blendVec.w = dissolveBlendVal;
     }
 }
