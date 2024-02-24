@@ -2,28 +2,33 @@ MaterialDef PBRCharacters {
 
     MaterialParameters {
 
-
     // -- params for BlendLayerEffects.glsllib:
 
         #for i=0..6 ( $0 )
-            Vector4 BlendLayer_$i_BlendVec //note that this needs to be a vec4 to store all possible blending vals that change every frame, as to avoid the lag from changing a float parm every frame
+            //note that this needs to be a vec4 to store all possible blending vals that change every frame, 
+            //as to avoid the lag from changing a float param every frame
+            Vector4 BlendLayer_$i_BlendVec
 
             Color BlendLayer_$i_BaseColor : 1.0 1.0 1.0 1.0
+            Vector3 BlendLayer_$i_HSVScalar : 0.0 0.0 0.0
             Float BlendLayer_$i_NormalIntensity : 1.0
 
             Float BlendLayer_$i_Roughness : 1.0
             Float BlendLayer_$i_Metallic : 1.0
+            Float BlendLayer_$i_AoStrength : 1.0
 
             Color BlendLayer_$i_EmissiveColor : 1.0 1.0 1.0 1.0
-            Float BlendLayer_$i_EmissivePower : 0.0
+            Float BlendLayer_$i_EmissiveIntensity : 0.0
 
             Boolean BlendLayer_$i_HeightBlendMode
 
-            Boolean BlendLayer_$i_BlendAlpha  //set true if you don't want alpha to come through as transparency, and to instead use it as a m 
+            //set true if you don't want alpha to come through as transparency, and to instead use it as a m 
+            Boolean BlendLayer_$i_BlendAlpha
 
-            Boolean BlendLayer_$i_TriPlanar : true 
-                 
-            Float BlendLayer_$i_heightEdgeBlend //do this using float as pct somehow..? or better to use it as height of the modelPos y or worldPos Y? hmm  
+            Boolean BlendLayer_$i_TriPlanar : true
+            
+            //do this using float as pct somehow...? or better to use it as height of the modelPos y or worldPos Y?
+            Float BlendLayer_$i_heightEdgeBlend
             
             Boolean BlendLayer_$i_DissolveMode
 
@@ -31,11 +36,9 @@ MaterialDef PBRCharacters {
             Float BlendLayer_$i_DisolveEdgeThickness
         
             Texture2D BlendLayer_$i_BaseColorMap
-            Texture2D BlendLayer_$i_NormalMap
-            Texture2D BlendLayer_$i_MetallicRoughnessAoMap //not setup to use individual roughness and metallic maps since that is less optimized, but can easily add them if needed
+            Texture2D BlendLayer_$i_NormalMap -LINEAR
+            Texture2D BlendLayer_$i_MetallicRoughnessAoMap -LINEAR //not setup to use individual roughness and metallic maps since that is less optimized, but can easily add them if needed
             Texture2D BlendLayer_$i_EmissiveMap
-
-
 
         #endfor
     // --
@@ -65,7 +68,6 @@ MaterialDef PBRCharacters {
             //   3 - metallic
             //   4 - ao
             //   5 - emissive
-
 
 //      _____________________ 
 
@@ -142,8 +144,6 @@ MaterialDef PBRCharacters {
         //Set to true to activate Steep Parallax mapping
         Boolean SteepParallax
 
-
-
         //Horizon fade
         Boolean HorizonFade
 
@@ -207,14 +207,13 @@ MaterialDef PBRCharacters {
         Vector2 LinearFog
         Float ExpFog
         Float ExpSqFog
-
     }
 
     Technique {
         LightMode SinglePassAndImageBased
         
-        VertexShader GLSL110 GLSL150:    Shaders/PBRCharacters.vert
-        FragmentShader GLSL110 GLSL150: Shaders/PBRCharacters.frag
+        VertexShader GLSL100 GLSL110 GLSL130 GLSL150:   Shaders/PBRCharacters.vert
+        FragmentShader GLSL100 GLSL110 GLSL130 GLSL150: Shaders/PBRCharacters.frag
 
         WorldParameters {
             WorldViewProjectionMatrix
@@ -247,9 +246,9 @@ MaterialDef PBRCharacters {
             EMISSIVE : Emissive
             SPECGLOSSPIPELINE : UseSpecGloss
             PARALLAXMAP : ParallaxMap
-            NORMALMAP_PARALLAX : PackedNormalParallax
-            STEEP_PARALLAX : SteepParallax
-            OCCLUSION_PARALLAX : OcclusionParallax
+            // NORMALMAP_PARALLAX : PackedNormalParallax
+            // STEEP_PARALLAX : SteepParallax
+            // OCCLUSION_PARALLAX : OcclusionParallax
             LIGHTMAP : LightMap
             SEPARATE_TEXCOORD : SeparateTexCoord
             DISCARD_ALPHA : AlphaDiscardThreshold                        
@@ -257,22 +256,22 @@ MaterialDef PBRCharacters {
             INSTANCING : UseInstancing
             USE_PACKED_MR: MetallicRoughnessMap
             USE_PACKED_SG: SpecularGlossinessMap
-          //  SPECULARMAP : SpecularMap
-         //   SPECULAR_AA : UseSpecularAA
-         //   SPECULAR_AA_SCREEN_SPACE_VARIANCE : SpecularAASigma
-         //   SPECULAR_AA_THRESHOLD : SpecularAAKappa
+            // SPECULARMAP : SpecularMap
+            // SPECULAR_AA : UseSpecularAA
+            // SPECULAR_AA_SCREEN_SPACE_VARIANCE : SpecularAASigma
+            // SPECULAR_AA_THRESHOLD : SpecularAAKappa
             GLOSSINESSMAP : GlossinessMap
             NORMAL_TYPE: NormalType
-            VERTEX_COLOR : UseVertexColor
+            // VERTEX_COLOR : UseVertexColor
             AO_MAP: LightMapAsAOMap
             AO_PACKED_IN_MR_MAP : AoPackedInMRMap
-       //     AO_STRENGTH : AoStrength
-       //     NUM_MORPH_TARGETS: NumberOfMorphTargets
-       //     NUM_TARGETS_BUFFERS: NumberOfTargetsBuffers
+            // AO_STRENGTH : AoStrength
+            // NUM_MORPH_TARGETS: NumberOfMorphTargets
+            // NUM_TARGETS_BUFFERS: NumberOfTargetsBuffers
             HORIZON_FADE: HorizonFade
             DEBUG_VALUES_MODE : DebugValuesMode
 
-            #for i=0..3 ( $0 )
+            #for i=0..4 ( $0 )
                 BLENDLAYER_$i : BlendLayer_$i_BlendVec
                 BLENDLAYER_$i_BASECOLORMAP : BlendLayer_$i_BaseColorMap
                 BLENDLAYER_$i_METALLICROUGHNESSAOMAP : BlendLayer_$i_MetallicRoughnessAoMap
@@ -284,7 +283,6 @@ MaterialDef PBRCharacters {
             #endfor 
         }
     }
-
 
     Technique PreShadow {
 
