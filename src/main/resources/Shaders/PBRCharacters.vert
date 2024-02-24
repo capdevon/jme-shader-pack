@@ -40,11 +40,28 @@ varying vec4 wTangent;
     uniform vec3 g_CameraPosition;
 #endif
 
+varying vec3 scaledModelPos;
+varying vec4 modelPos;
+varying vec3 modelNorm;
+
 void main(){    
     
     vec4 modelSpacePos = vec4(inPosition, 1.0);
     vec3 modelSpaceNorm = inNormal;
     vec3 modelSpaceTan  = inTangent.xyz;
+    
+    modelNorm = modelSpaceNorm;
+    modelPos = modelSpacePos;
+    
+    float xTot, zTot, yTot;
+    
+    xTot = length(g_WorldMatrix[0]);
+    yTot = length(g_WorldMatrix[1]);
+    zTot = length(g_WorldMatrix[2]);
+    
+    vec3 scaleVec = vec3(xTot,yTot,zTot);
+    
+    scaledModelPos = modelPos.xyz * scaleVec;
     
     #ifdef USE_VERTEX_COLORS_AS_SUN_INTENSITY
         vertColors = inColor;
