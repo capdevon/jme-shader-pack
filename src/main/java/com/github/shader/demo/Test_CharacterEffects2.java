@@ -5,12 +5,11 @@ import java.awt.Toolkit;
 import java.util.LinkedList;
 import java.util.Queue;
 
-import com.github.shader.demo.utils.BlendEffectState;
-import com.github.shader.demo.utils.DebugGridState;
+import com.github.shader.demo.states.BlendEffectState;
+import com.github.shader.demo.states.DefaultSceneState;
 import com.github.shader.demo.utils.GameObject;
 import com.jme3.anim.AnimComposer;
 import com.jme3.anim.SkinningControl;
-import com.jme3.app.Application;
 import com.jme3.app.ChaseCameraAppState;
 import com.jme3.app.SimpleApplication;
 import com.jme3.font.BitmapFont;
@@ -19,22 +18,12 @@ import com.jme3.input.KeyInput;
 import com.jme3.input.controls.ActionListener;
 import com.jme3.input.controls.KeyTrigger;
 import com.jme3.input.controls.Trigger;
-import com.jme3.light.AmbientLight;
-import com.jme3.light.DirectionalLight;
-import com.jme3.light.LightProbe;
 import com.jme3.math.ColorRGBA;
 import com.jme3.math.FastMath;
-import com.jme3.math.Vector3f;
-import com.jme3.post.FilterPostProcessor;
-import com.jme3.post.filters.FXAAFilter;
-import com.jme3.renderer.queue.RenderQueue;
 import com.jme3.scene.Node;
 import com.jme3.scene.Spatial;
 import com.jme3.scene.debug.custom.ArmatureDebugAppState;
-import com.jme3.shadow.DirectionalLightShadowFilter;
-import com.jme3.shadow.EdgeFilteringMode;
 import com.jme3.system.AppSettings;
-import com.jme3.util.SkyFactory;
 import com.simsilica.lemur.GuiGlobals;
 import com.simsilica.lemur.style.BaseStyles;
 
@@ -68,7 +57,7 @@ public class Test_CharacterEffects2 extends SimpleApplication {
     private static final String MODEL_ASSET_PATH = "Models/Erika/Erika.j3o";
 //    private static final String MODEL_ASSET_PATH = "Models/YBot/YBot.j3o";
 
-    private BitmapText hud;
+    private BitmapText animUI;
     private Spatial model;
     private AnimComposer animComposer;
     private SkinningControl skinningControl;
@@ -80,19 +69,26 @@ public class Test_CharacterEffects2 extends SimpleApplication {
         armatureDebugState = new ArmatureDebugAppState();
         stateManager.attach(armatureDebugState);
 
-        hud = makeLabelUI("", ColorRGBA.Blue, guiNode);
-        hud.setLocalTranslation(10f, settings.getHeight() - 10f, 0);
+        animUI = makeTextUI("CurrentAction:", ColorRGBA.Blue);
+        animUI.setLocalTranslation(10f, settings.getHeight() - 10f, 0);
 
-        initLemur(this);
+        initLemur();
         configureCamera();
         setupCamera();
-        setupSky();
-        initFilters();
         loadModel();
         initKeys();
-        
+
+        stateManager.attach(new DefaultSceneState());
         stateManager.attach(new BlendEffectState(model));
-        stateManager.attach(new DebugGridState());
+        // stateManager.attach(new DebugGridState());
+        // stateManager.attach(new DetailedProfilerState());
+    }
+    
+    private void initLemur() {
+        // initialize lemur
+        GuiGlobals.initialize(this);
+        BaseStyles.loadGlassStyle();
+        GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
     }
 
     private void configureCamera() {
@@ -124,47 +120,6 @@ public class Test_CharacterEffects2 extends SimpleApplication {
         chaseCam.setDefaultVerticalRotation(0.3f);
     }
 
-    /**
-     * a sky as background
-     */
-    private void setupSky() {
-        Spatial sky = SkyFactory.createSky(assetManager, "Scenes/Beach/FullskiesSunset0068.dds",
-                SkyFactory.EnvMapType.CubeMap);
-        sky.setShadowMode(RenderQueue.ShadowMode.Off);
-        rootNode.attachChild(sky);
-    }
-
-    private void initFilters() {
-        rootNode.setShadowMode(RenderQueue.ShadowMode.CastAndReceive);
-        
-        DirectionalLight sun = new DirectionalLight();
-        sun.setDirection(new Vector3f(0.0f, -1.0f, 0.0f).normalizeLocal());
-        rootNode.addLight(sun);
-
-        AmbientLight ambient = new AmbientLight();
-        ambient.setColor(new ColorRGBA(0.25f, 0.25f, 0.25f, 1));
-//       rootNode.addLight(ambient);
-
-        // add a PBR probe.
-        Spatial probeModel = assetManager.loadModel("Scenes/defaultProbe.j3o");
-        LightProbe lightProbe = (LightProbe) probeModel.getLocalLightList().get(0);
-        lightProbe.getArea().setRadius(100);
-        rootNode.addLight(lightProbe);
-
-        FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
-        viewPort.addProcessor(fpp);
-
-        DirectionalLightShadowFilter dlsf = new DirectionalLightShadowFilter(assetManager, 4096, 3);
-        dlsf.setLight(sun);
-        dlsf.setShadowIntensity(0.4f);
-        dlsf.setShadowZExtend(256);
-        dlsf.setEdgeFilteringMode(EdgeFilteringMode.PCFPOISSON);
-        fpp.addFilter(dlsf);
-
-        FXAAFilter fxaa = new FXAAFilter();
-        fpp.addFilter(fxaa);
-    }
-
     private void loadModel() {
         model = assetManager.loadModel(MODEL_ASSET_PATH);
         rootNode.attachChild(model);
@@ -179,22 +134,15 @@ public class Test_CharacterEffects2 extends SimpleApplication {
         // skinningControl.setHardwareSkinningPreferred(false);
     }
     
-    private BitmapText makeLabelUI(String text, ColorRGBA color, Node parent) {
+    private BitmapText makeTextUI(String text, ColorRGBA color) {
         BitmapFont font = assetManager.loadFont("Interface/Fonts/Default.fnt");
         BitmapText bmp = new BitmapText(font);
         bmp.setName("MyLabel");
         bmp.setText(text);
         bmp.setColor(color);
         bmp.setSize(font.getCharSet().getRenderedSize());
-        parent.attachChild(bmp);
+        guiNode.attachChild(bmp);
         return bmp;
-    }
-
-    private void initLemur(Application app) {
-        // initialize lemur
-        GuiGlobals.initialize(app);
-        BaseStyles.loadGlassStyle();
-        GuiGlobals.getInstance().getStyles().setDefaultStyle("glass");
     }
 
     /**
@@ -204,7 +152,7 @@ public class Test_CharacterEffects2 extends SimpleApplication {
         addMapping("Speed+", new KeyTrigger(KeyInput.KEY_U));
         addMapping("Speed-", new KeyTrigger(KeyInput.KEY_I));
         addMapping("Next", new KeyTrigger(KeyInput.KEY_N));
-        addMapping("ToggleArmature", new KeyTrigger(KeyInput.KEY_M));
+        addMapping("ToggleArmature", new KeyTrigger(KeyInput.KEY_H));
     }
 
     private void addMapping(String mappingName, Trigger... triggers) {
@@ -226,15 +174,20 @@ public class Test_CharacterEffects2 extends SimpleApplication {
                 String anim = animsQueue.poll();
                 animsQueue.add(anim);
                 animComposer.setCurrentAction(anim);
-                hud.setText(anim);
+                animUI.setText("CurrentAction: " + anim);
 
             } else if (name.equals("Speed+")) {
-                float glSpeed = animComposer.getGlobalSpeed();
-                animComposer.setGlobalSpeed(glSpeed + 0.1f);
+                float animSpeed = animComposer.getGlobalSpeed();
+                if (animSpeed > 2.0f) {
+                    animSpeed = 2;
+                }
+                animComposer.setGlobalSpeed(animSpeed + 0.1f);
 
             } else if (name.equals("Speed-")) {
-                float glSpeed = animComposer.getGlobalSpeed();
-                animComposer.setGlobalSpeed(glSpeed - 0.1f);
+                float animSpeed = animComposer.getGlobalSpeed();
+                if (animSpeed < 0.0f)
+                    animSpeed = 0;
+                animComposer.setGlobalSpeed(animSpeed - 0.1f);
 
             } else if (name.equals("ToggleArmature")) {
                 armatureDebugState.setEnabled(!armatureDebugState.isEnabled());

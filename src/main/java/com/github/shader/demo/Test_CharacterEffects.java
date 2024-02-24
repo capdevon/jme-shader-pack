@@ -1,6 +1,6 @@
 package com.github.shader.demo;
 
-import com.github.shader.demo.utils.BlendEffectState;
+import com.github.shader.demo.states.BlendEffectState;
 import com.github.shader.demo.utils.GameObject;
 import com.jme3.anim.AnimComposer;
 import com.jme3.app.Application;
@@ -68,7 +68,6 @@ public class Test_CharacterEffects extends SimpleApplication {
         initFilters();
 
         stateManager.attach(new BlendEffectState(erikaSpatial));
-        
 //        stateManager.attach(new DebugGridState());
 //        stateManager.attach(new DetailedProfilerState());
     }
@@ -130,11 +129,12 @@ public class Test_CharacterEffects extends SimpleApplication {
     }
 
     private void initFilters() {
-        DirectionalLight sun = new DirectionalLight();
-        sun.setDirection(new Vector3f(-1, -1, -1).normalizeLocal());
-        rootNode.addLight(sun);
+        DirectionalLight sunLight = new DirectionalLight();
+        sunLight.setDirection(new Vector3f(-1, -1, -1).normalizeLocal());
+        rootNode.addLight(sunLight);
         
-        AmbientLight al = new AmbientLight(new ColorRGBA(1.2f, 1.2f, 1.3f, 0.0f));
+        AmbientLight al = new AmbientLight();
+        al.setColor(new ColorRGBA(1.2f, 1.2f, 1.3f, 0.0f));
         //rootNode.addLight(al);
 
         // add a PBR probe.
@@ -146,19 +146,12 @@ public class Test_CharacterEffects extends SimpleApplication {
         DirectionalLightShadowRenderer dlsr = new DirectionalLightShadowRenderer(assetManager, 4_096, 3);
         dlsr.setEdgeFilteringMode(EdgeFilteringMode.PCFPOISSON);
         dlsr.setEdgesThickness(5);
-        dlsr.setLight(sun);
+        dlsr.setLight(sunLight);
         dlsr.setShadowIntensity(0.65f);
         viewPort.addProcessor(dlsr);
 
         FilterPostProcessor fpp = new FilterPostProcessor(assetManager);
         viewPort.addProcessor(fpp);
-
-        /**
-         * for PBR, you need to use GlowMode.Scene in the BloomFilter
-         */
-        BloomFilter bloom = new BloomFilter(BloomFilter.GlowMode.Scene);
-        bloom.setBloomIntensity(5.0f);
-        //fpp.addFilter(bloom);
 
         FXAAFilter fxaa = new FXAAFilter();
         fpp.addFilter(fxaa);
