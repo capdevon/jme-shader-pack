@@ -53,7 +53,7 @@ dependencies {
     runtimeOnly    'org.jmonkeyengine:jme3-awt-dialogs:' + jmeVersion
     
     //implementation 'com.github.stephengold:Minie:7.8.1+big3'
-    implementation 'com.github.stephengold:Heart:8.8.0'
+    implementation 'com.github.stephengold:Heart:9.0.0'
     implementation 'com.github.stephengold:SkyControl:1.0.5'
 
     // select one version of LWJGL
