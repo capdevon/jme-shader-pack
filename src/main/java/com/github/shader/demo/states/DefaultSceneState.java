@@ -17,9 +17,15 @@ import com.jme3.scene.Spatial;
 import com.jme3.scene.shape.Box;
 import com.jme3.shadow.DirectionalLightShadowFilter;
 import com.jme3.shadow.EdgeFilteringMode;
+import com.jme3.terrain.geomipmap.TerrainQuad;
+import com.jme3.texture.Image;
 import com.jme3.texture.Texture;
 import com.jme3.texture.Texture.WrapMode;
+import com.jme3.texture.TextureArray;
 import com.jme3.util.SkyFactory;
+import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.List;
 
 import jme3utilities.sky.SkyControl;
 import jme3utilities.sky.StarsOption;
@@ -37,7 +43,7 @@ public class DefaultSceneState extends MySimpleState {
     protected void initialize(Application app) {
         super.initialize(app);
         
-        initFloor();
+        initTerrainFloor();
         initFilters();
         
         if (dynamicSky) {
@@ -93,7 +99,61 @@ public class DefaultSceneState extends MySimpleState {
         viewPort.addProcessor(fpp);
     }
     
-    private void initFloor() {
+    private void initTerrainFloor() {
+        Material pbr = new Material(assetManager, "Common/MatDefs/Terrain/AdvancedPBRTerrain.j3md");       
+        
+        
+        Texture albedoMap = assetManager.loadTexture("Models/SwampyGrass/DefaultMaterial_baseColor.png");
+        Texture normalMap = assetManager.loadTexture("Models/SwampyGrass/DefaultMaterial_normal.png");             
+        Texture metallicRoughnessAoEiMap = assetManager.loadTexture("Models/SwampyGrass/DefaultMaterial_occlusionRoughnessMetallic.png");
+   
+        TerrainQuad terrain = new TerrainQuad("Terrain", 5, 9, null);
+        
+        pbr.setFloat("AlbedoMap_0_scale", 1.85f);
+        
+        pbr.setTexture("AlphaMap", assetManager.loadTexture("Textures/Terrain/splat/alpha1.png"));
+       
+        
+        TextureArray albedoTextureArray = makeSingleImageTextureArray(albedoMap);
+        TextureArray normalTextureArray = makeSingleImageTextureArray(normalMap);
+        TextureArray metallicRoughnessTextureArray = makeSingleImageTextureArray(metallicRoughnessAoEiMap);
+        
+        ((Texture)albedoTextureArray).setMagFilter(Texture.MagFilter.Bilinear);
+        ((Texture)normalTextureArray).setMagFilter(Texture.MagFilter.Bilinear);
+        ((Texture)metallicRoughnessTextureArray).setMagFilter(Texture.MagFilter.Bilinear);
+        
+         ((Texture)metallicRoughnessTextureArray).setMinFilter(Texture.MinFilter.Trilinear);
+         ((Texture)normalTextureArray).setMinFilter(Texture.MinFilter.Trilinear);
+         ((Texture)metallicRoughnessTextureArray).setMinFilter(Texture.MinFilter.Trilinear);
+        
+        pbr.setInt("AlbedoMap_0", 0);
+        pbr.setInt("NormalMap_0", 0);
+        pbr.setInt("MetallicRoughnessMap_0", 0);
+        
+        pbr.setFloat("Roughness_0", 1.0f);
+        pbr.setFloat("Metallic_0", 1.0f);
+        
+        pbr.setTexture("AlbedoTextureArray", albedoTextureArray);
+        pbr.setTexture("NormalParallaxTextureArray", normalTextureArray);
+        pbr.setTexture("MetallicRoughnessAoEiTextureArray", metallicRoughnessTextureArray);
+        
+//        pbr.setColor("BaseColor", ColorRGBA.Gray);
+        pbr.setFloat("Metallic_0", 0.04f);
+        pbr.setFloat("Roughness_0", 0.95f);
+        
+
+        terrain.setMaterial(pbr);
+        
+        rootNode.attachChild(terrain);
+    }
+    
+    private TextureArray makeSingleImageTextureArray(Texture texture){
+        TextureArray texArray = new TextureArray(new ArrayList<Image>(Arrays.asList(texture.getImage())));
+        texArray.setWrap(WrapMode.Repeat);
+        return texArray;
+    }
+    
+    private void initGridFloor() {
         Material pbr = new Material(assetManager, "Common/MatDefs/Light/PBRLighting.j3md");
         Texture texture = assetManager.loadTexture("Textures/default_grid.png");
         texture.setWrap(WrapMode.Repeat);
