@@ -8,9 +8,9 @@ import com.jme3.math.Vector2f;
  *
  * @author ryan
  */
-public class ShaderBlendLayerGenerator {
+public class ShaderBlendLayerFactory {
 
-    public static ShaderBlendLayer makeDefaultIceLayer(AssetManager assetManager) {
+    public static ShaderBlendLayer createDefaultIceLayer(AssetManager assetManager) {
         String dirName = "Models/Cracked_Ice/DefaultMaterial_";
         ShaderBlendLayer ice = new ShaderBlendLayer("Freeze");
         ice.setBaseColorMap(assetManager.loadTexture(dirName + "baseColor.png"));
@@ -26,7 +26,7 @@ public class ShaderBlendLayerGenerator {
         return ice;
     }
 
-    public static ShaderBlendLayer makeDefaultStoneLayer(AssetManager assetManager) {
+    public static ShaderBlendLayer createDefaultStoneLayer(AssetManager assetManager) {
         String dirName = "Models/Cracked_Stone/DefaultMaterial_";
         ShaderBlendLayer stone = new ShaderBlendLayer("Petrify");
         stone.setBaseColorMap(assetManager.loadTexture(dirName + "baseColor.png"));
@@ -42,7 +42,7 @@ public class ShaderBlendLayerGenerator {
         return stone;
     }
 
-    public static ShaderBlendLayer makeDefaultShieldArmorLayer(AssetManager assetManager) {
+    public static ShaderBlendLayer createDefaultShieldArmorLayer(AssetManager assetManager) {
         String dirName = "Models/Shield_Armor/DefaultMaterial_";
         ShaderBlendLayer shield = new ShaderBlendLayer("Shield");
         shield.setBaseColorMap(assetManager.loadTexture(dirName + "baseColor.png"));
@@ -61,7 +61,7 @@ public class ShaderBlendLayerGenerator {
         return shield;
     }
 
-    public static ShaderBlendLayer makeDefaultRustLayer(AssetManager assetManager) {
+    public static ShaderBlendLayer createDefaultRustLayer(AssetManager assetManager) {
         String dirName = "Models/Rust/DefaultMaterial_";
         ShaderBlendLayer rust = new ShaderBlendLayer("Rust");
         rust.setBaseColorMap(assetManager.loadTexture(dirName + "baseColor.png"));
@@ -80,7 +80,7 @@ public class ShaderBlendLayerGenerator {
         return rust;
     }
 
-    public static ShaderBlendLayer makeBlankLayer(String name) {
+    public static ShaderBlendLayer createBlankLayer(String name) {
         ShaderBlendLayer blankWhiteLayer = new ShaderBlendLayer(name);
         blankWhiteLayer.setBaseColor(new ColorRGBA(1.0f, 1.0f, 1.0f, 1.0f));
         return blankWhiteLayer;
