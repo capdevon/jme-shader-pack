@@ -24,14 +24,11 @@ public class ShaderBlendLayerDisplayContainer extends Container {
     public RollupPanel propertyPanel;
     private ShaderBlendLayer shaderBlendLayer;
 
-    public ShaderBlendLayer getShaderBlendLayer() {
-        return shaderBlendLayer;
-    }
-
-    public RollupPanel getPropertyPanel() {
-        return propertyPanel;
-    }
-
+    /**
+     * Constructor.
+     * 
+     * @param shaderBlendLayer
+     */
     public ShaderBlendLayerDisplayContainer(ShaderBlendLayer shaderBlendLayer) {
         super();
         this.shaderBlendLayer = shaderBlendLayer;
@@ -49,7 +46,7 @@ public class ShaderBlendLayerDisplayContainer extends Container {
         addChild(xRemoveButton, 0, 2);
     }
 
-    public RollupPanel makePropertiesPanel(String name, Object obj) {
+    private RollupPanel makePropertiesPanel(String name, Object obj) {
 
         // probably pass this in as a parm so it can differ for effect vs blendLayer
         ConfigurationBuilder config = new ConfigurationBuilder();
@@ -69,6 +66,14 @@ public class ShaderBlendLayerDisplayContainer extends Container {
         rollup.setAlpha(0, false);
         rollup.setOpen(false);
         return rollup;
+    }
+    
+    public ShaderBlendLayer getShaderBlendLayer() {
+        return shaderBlendLayer;
+    }
+
+    public RollupPanel getPropertyPanel() {
+        return propertyPanel;
     }
 
 }
