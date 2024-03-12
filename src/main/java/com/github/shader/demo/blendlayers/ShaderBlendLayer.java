@@ -96,7 +96,7 @@ public class ShaderBlendLayer {
         return layerIndex;
     }
 
-    public void registerEffect(BlendLayerEffect effect) {
+    public void addEffect(BlendLayerEffect effect) {
         if (!activeEffects.contains(effect)) {
             activeEffects.add(effect);
             effect.setAffectedLayer(this);
@@ -108,14 +108,14 @@ public class ShaderBlendLayer {
     }
 
     public void update(float tpf) {
-        for (int e = 0; e < activeEffects.size(); e++) {
-            BlendLayerEffect effect = activeEffects.get(e);
+        for (int i = 0; i < activeEffects.size(); i++) {
+            BlendLayerEffect effect = activeEffects.get(i);
             if (effect != null) {
                 effect.update(tpf);
 
                 if (effect.isFinished()) {
                     activeEffects.remove(effect);
-                    e--;
+                    i--;
 
                     effect.onFinish();
 
@@ -128,7 +128,6 @@ public class ShaderBlendLayer {
     }
 
     public void clearLayer() {
-
         ArrayList<String> paramNamesToClear = new ArrayList<>();
         for (Material mat : materials) {
             for (MatParam matParam : mat.getParams()) {
@@ -190,18 +189,18 @@ public class ShaderBlendLayer {
 
         material.setParam(blendLayerPrefixedName + "_BaseColor", VarType.Vector4, baseColor);
         material.setParam(blendLayerPrefixedName + "_EmissiveColor", VarType.Vector4, emissiveColor);
-        material.setParam(blendLayerPrefixedName + "_BlendAlpha", VarType.Boolean, blendAlpha);
-        material.setParam(blendLayerPrefixedName + "_EmissiveIntensity", VarType.Float, emissiveIntensity);
+        material.setBoolean(blendLayerPrefixedName + "_BlendAlpha", blendAlpha);
+        material.setFloat(blendLayerPrefixedName + "_EmissiveIntensity", emissiveIntensity);
 
-        material.setParam(blendLayerPrefixedName + "_HSVScalar", VarType.Vector4, hsvScalar);
+        material.setVector4(blendLayerPrefixedName + "_HSVScalar", hsvScalar);
 
-        material.setParam(blendLayerPrefixedName + "_EdgeFadeThickness", VarType.Float, edgeFadeThickness);
+        material.setFloat(blendLayerPrefixedName + "_EdgeFadeThickness", edgeFadeThickness);
         material.setParam(blendLayerPrefixedName + "_EdgeFadeColorA", VarType.Vector4, edgeFadeColorGradientStart);
         material.setParam(blendLayerPrefixedName + "_EdgeFadeColorB", VarType.Vector4, edgeFadeColorGradientEnd);
 
-        material.setParam(blendLayerPrefixedName + "_TriPlanar", VarType.Boolean, triplanar);
+        material.setBoolean(blendLayerPrefixedName + "_TriPlanar", triplanar);
 
-        material.setParam(blendLayerPrefixedName + "_IsMultiplicative", VarType.Boolean, multiplicative);
+        material.setBoolean(blendLayerPrefixedName + "_IsMultiplicative", multiplicative);
 
         // to-do: set all other possible matParams here, so this method can be called
         // when a new material is added to an existent layer, and for when layers are
@@ -211,7 +210,6 @@ public class ShaderBlendLayer {
         setDissolveNoiseVal0(dissolveNoiseVal0);
         setDissolveNoiseVal1(dissolveNoiseVal1);
         setDissolveNoiseVal2(dissolveNoiseVal2);
-
     }
 
     public boolean isTriplanar() {
@@ -221,42 +219,23 @@ public class ShaderBlendLayer {
     public void setTriplanar(boolean triplanar) {
         this.triplanar = triplanar;
         setParam(blendLayerPrefixedName + "_TriPlanar", VarType.Boolean, triplanar);
-
         setTexturesWrappable(triplanar);
-
     }
 
     private void setTexturesWrappable(boolean wrap) {
-        if (baseColorMap != null) {
+        setTexturesWrappable(baseColorMap, wrap);
+        setTexturesWrappable(normalMap, wrap);
+        setTexturesWrappable(metallicRoughnessAoMap, wrap);
+        setTexturesWrappable(emissiveMap, wrap);
+    }
+    
+    private void setTexturesWrappable(Texture texture, boolean wrap) {
+        if (texture != null) {
             if (wrap) {
-                baseColorMap.setWrap(Texture.WrapMode.Repeat);
+                texture.setWrap(Texture.WrapMode.Repeat);
             } else {
                 // is this the correct way to clear wrap.repeat mode?
-                baseColorMap.setWrap(Texture.WrapMode.EdgeClamp);
-            }
-        }
-        if (normalMap != null) {
-            if (wrap) {
-                normalMap.setWrap(Texture.WrapMode.Repeat);
-            } else {
-                // is this the correct way to clear wrap.repeat mode?
-                normalMap.setWrap(Texture.WrapMode.EdgeClamp);
-            }
-        }
-        if (metallicRoughnessAoMap != null) {
-            if (wrap) {
-                metallicRoughnessAoMap.setWrap(Texture.WrapMode.Repeat);
-            } else {
-                // is this the correct way to clear wrap.repeat mode?
-                metallicRoughnessAoMap.setWrap(Texture.WrapMode.EdgeClamp);
-            }
-        }
-        if (emissiveMap != null) {
-            if (wrap) {
-                emissiveMap.setWrap(Texture.WrapMode.Repeat);
-            } else {
-                // is this the correct way to clear wrap.repeat mode?
-                emissiveMap.setWrap(Texture.WrapMode.EdgeClamp);
+                texture.setWrap(Texture.WrapMode.EdgeClamp);
             }
         }
     }
@@ -402,7 +381,6 @@ public class ShaderBlendLayer {
         } else {
             this.setParam(this.blendLayerPrefixedName + "_DissolveNoiseVec_2", VarType.Vector2, dissolveNoiseVal2);
         }
-
     }
 
     public void setDissolveNoiseVal1(Vector2f dissolveNoiseVal1) {
