@@ -4,13 +4,20 @@ MaterialDef PBRCharacters {
 
     // -- params for BlendLayerEffects.glsllib:
 
-        #for i=0..6 ( $0 )
+        Vector3 BlendGroup_SpatialDimensions : 1.0 1.0 1.0
+        Vector3 BlendGroup_SpatialOriginOffset : 0.0 0.0 0.0
+
+        #for i=0..8 ( $0 )
             //note that this needs to be a vec4 to store all possible blending vals that change every frame, 
             //as to avoid the lag from changing a float param every frame
             Vector4 BlendLayer_$i_BlendVec
 
+            Boolean BlendLayer_$i_IsMultiplicative : false
+
+            Float BlendLayer_$i_Scale : 1.0
+
             Color BlendLayer_$i_BaseColor : 1.0 1.0 1.0 1.0
-            Vector3 BlendLayer_$i_HSVScalar : 0.0 0.0 0.0
+            Vector4 BlendLayer_$i_HSVScalar : 0.0 0.0 0.0 0.0
             Float BlendLayer_$i_NormalIntensity : 1.0
 
             Float BlendLayer_$i_Roughness : 1.0
@@ -27,13 +34,14 @@ MaterialDef PBRCharacters {
 
             Boolean BlendLayer_$i_TriPlanar : true
             
-            //do this using float as pct somehow...? or better to use it as height of the modelPos y or worldPos Y?
-            Float BlendLayer_$i_heightEdgeBlend
+            #for y=0..3 ( $0 )
+                Vector2 BlendLayer_$i_DissolveNoiseVec_$y
+            #endfor
             
-            Boolean BlendLayer_$i_DissolveMode
 
-            Color BlendLayer_$i_DissolveEdgeColor
-            Float BlendLayer_$i_DisolveEdgeThickness
+            Color BlendLayer_$i_EdgeFadeColorA : 0.0 0.0 0.0 0.0
+            Color BlendLayer_$i_EdgeFadeColorB : 0.0 0.0 0.0 0.0
+            Float BlendLayer_$i_EdgeFadeThickness : 0.025
         
             Texture2D BlendLayer_$i_BaseColorMap
             Texture2D BlendLayer_$i_NormalMap -LINEAR
@@ -271,7 +279,7 @@ MaterialDef PBRCharacters {
             HORIZON_FADE: HorizonFade
             DEBUG_VALUES_MODE : DebugValuesMode
 
-            #for i=0..4 ( $0 )
+            #for i=0..8 ( $0 )
                 BLENDLAYER_$i : BlendLayer_$i_BlendVec
                 BLENDLAYER_$i_BASECOLORMAP : BlendLayer_$i_BaseColorMap
                 BLENDLAYER_$i_METALLICROUGHNESSAOMAP : BlendLayer_$i_MetallicRoughnessAoMap
@@ -280,6 +288,10 @@ MaterialDef PBRCharacters {
 
                 BLENDLAYER_$i_TRIPLANAR : BlendLayer_$i_TriPlanar
                 BLENDLAYER_$i_BLENDALPHA : BlendLayer_$i_BlendAlpha
+
+                #for y=0..3 ( $0 )
+                    BLENDLAYER_$i_DISSOLVENOISEVEC_$y : BlendLayer_$i_DissolveNoiseVec_$y
+                #endfor
             #endfor 
         }
     }
@@ -372,8 +384,8 @@ MaterialDef PBRCharacters {
 
     Technique Glow {
 
-        VertexShader GLSL100 GLSL150:   Common/MatDefs/Misc/Unshaded.vert
-        FragmentShader GLSL100 GLSL150: Common/MatDefs/Light/Glow.frag
+        VertexShader GLSL300 GLSL100 GLSL150:   Common/MatDefs/Misc/Unshaded.vert
+        FragmentShader GLSL300 GLSL150 GLSL100: Common/MatDefs/Light/PBRGlow.frag
 
         WorldParameters {
             WorldViewProjectionMatrix
@@ -381,7 +393,10 @@ MaterialDef PBRCharacters {
             ViewMatrix
         }
 
-        Defines {
+        Defines {            
+            HAS_EMISSIVEMAP : EmissiveMap
+            HAS_EMISSIVECOLOR : Emissive
+            BOUND_DRAW_BUFFER: BoundDrawBuffer
             NEED_TEXCOORD1
             NUM_BONES : NumberOfBones
             INSTANCING : UseInstancing

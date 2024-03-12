@@ -1,6 +1,6 @@
 package com.github.shader.demo.states;
 
-import com.github.shader.demo.utils.BlendLayerEffect;
+import com.github.shader.demo.utils.blendlayers.ShaderBlendLayer;
 import com.github.tools.SpinnerIntegerModel;
 import com.github.tools.editor.ReflectedEditorBuilder;
 import com.github.tools.material.MatPropertyPanelBuilder;
@@ -61,35 +61,35 @@ public class BlendEffectState extends MySimpleState {
     private void initEffects() {
 
         String dirName = "Models/Cracked_Ice/DefaultMaterial_";
-        BlendLayerEffect ice = new BlendLayerEffect("Freeze", 0, model);
+        ShaderBlendLayer ice = new ShaderBlendLayer("Freeze", 0, model);
         ice.setBaseColorMap(assetManager.loadTexture(dirName + "baseColor.png"));
         ice.setNormalMap(assetManager.loadTexture(dirName + "normal.png"));
         ice.setMetallicRoughnessAoMap(assetManager.loadTexture(dirName + "occlusionRoughnessMetallic.png"));
 
         dirName = "Models/Cracked_Stone/DefaultMaterial_";
-        BlendLayerEffect stone = new BlendLayerEffect("Petrify", 1, model);
+        ShaderBlendLayer stone = new ShaderBlendLayer("Petrify", 1, model);
         stone.setBaseColorMap(assetManager.loadTexture(dirName + "baseColor.png"));
         stone.setNormalMap(assetManager.loadTexture(dirName + "normal.png"));
         stone.setMetallicRoughnessAoMap(assetManager.loadTexture(dirName + "occlusionRoughnessMetallic.png"));
 
         dirName = "Models/Shield_Armor/DefaultMaterial_";
-        BlendLayerEffect shield = new BlendLayerEffect("Shield", 2, model);
+        ShaderBlendLayer shield = new ShaderBlendLayer("Shield", 2, model);
         shield.setBaseColorMap(assetManager.loadTexture(dirName + "baseColor.png"));
         shield.setNormalMap(assetManager.loadTexture(dirName + "normal.png"));
         shield.setMetallicRoughnessAoMap(assetManager.loadTexture(dirName + "occlusionRoughnessMetallic.png"));
         shield.setEmissiveMap(assetManager.loadTexture(dirName + "emissive.png"));
         shield.setBlendAlpha(true);
         
-        BlendLayerEffect dissolve = new BlendLayerEffect("Dissolve", 3, model);
+        ShaderBlendLayer dissolve = new ShaderBlendLayer("Dissolve", 3, model);
         dissolve.setBaseColor(new ColorRGBA(1.0f, 0.0f, 1.0f, 0.0f));
 
         registerEffects(ice, stone, shield, dissolve);
     }
     
-    private void registerEffects(BlendLayerEffect... effects) {
+    private void registerEffects(ShaderBlendLayer... effects) {
         Container container = new Container(new SpringGridLayout(Axis.Y, Axis.X, FillMode.None, FillMode.Even));
 
-        for (BlendLayerEffect effect : effects) {
+        for (ShaderBlendLayer effect : effects) {
             ConfigurationBuilder config = new ConfigurationBuilder();
             //config.addConstraint("linearBlendVal", new SpinnerFloatModel(0f, 1f, 0.1f));
             config.addConstraint("debugMode", new SpinnerIntegerModel(-1, 5, 1));
