@@ -1,6 +1,6 @@
 package com.github.shader.demo.states;
 
-import com.github.shader.demo.utils.blendlayers.ShaderBlendLayer;
+import com.github.shader.demo.blendlayers.ShaderBlendLayer;
 import com.github.tools.SpinnerIntegerModel;
 import com.github.tools.editor.ReflectedEditorBuilder;
 import com.github.tools.material.MatPropertyPanelBuilder;
