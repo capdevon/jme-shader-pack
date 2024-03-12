@@ -15,7 +15,7 @@ import com.jme3.scene.Spatial;
  */
 public class BlendGroup {
 
-    public Spatial spatial = null;
+    private Spatial spatial;
     
     /**
      * Number of layers to reserve at the start of the blend-stack. All dynamic
@@ -56,10 +56,6 @@ public class BlendGroup {
         return currentDynamicLayerCount + reservedLayerCount;
     }
 
-    public void setReservedLayer() {
-
-    }
-
     public void setBlendLayer(int layerIndex, ShaderBlendLayer blendLayer) {
 
         if (layerIndex >= reservedLayerCount) {
@@ -82,8 +78,13 @@ public class BlendGroup {
         this.setBlendLayer(layerIndexA, layerB);
     }
 
-    // set a new layer at the desired index, and shift all other above it up to make
-    // room
+    /**
+     * Sets a specific layer in the currentLayers array and shifts all layers above
+     * it up by one index.
+     * 
+     * @param layer      the ShaderBlendLayer to be set
+     * @param layerIndex the index in the currentLayers array where the layer should be set
+     */
     public void setBlendLayerAndShiftUp(ShaderBlendLayer layer, int layerIndex) {
         for (int i = currentLayers.length - 1; i >= layerIndex; i--) {
 
@@ -117,11 +118,10 @@ public class BlendGroup {
 
                 if (layerIndex >= reservedLayerCount) {
                     currentDynamicLayerCount--;
-                    System.out.println(" CLC 11111   ::   " + currentDynamicLayerCount);
+                    System.out.println("CLC 11111::" + currentDynamicLayerCount);
                 }
 
                 currentLayers[layerIndex] = null;
-
             }
         }
     }
@@ -138,11 +138,11 @@ public class BlendGroup {
 
             if (spatial != null) {
                 BoundingVolume bounds = spatial.getWorldBound();
-                float yDim, xDim, zDim;
                 if (bounds instanceof BoundingBox) {
-                    yDim = ((BoundingBox) bounds).getYExtent() * 2;
-                    xDim = ((BoundingBox) bounds).getXExtent() * 2;
-                    zDim = ((BoundingBox) bounds).getZExtent() * 2;
+                    BoundingBox bbox = (BoundingBox) bounds;
+                    float yDim = bbox.getYExtent() * 2;
+                    float xDim = bbox.getXExtent() * 2;
+                    float zDim = bbox.getZExtent() * 2;
                     spatialDimensions.set(xDim, yDim, zDim);
 
                 } else if (bounds instanceof BoundingSphere) {
