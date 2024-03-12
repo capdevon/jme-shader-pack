@@ -8,7 +8,7 @@ import java.util.Queue;
 
 import com.github.shader.demo.blendlayers.BlendGroup;
 import com.github.shader.demo.blendlayers.ShaderBlendLayer;
-import com.github.shader.demo.blendlayers.ShaderBlendLayerGenerator;
+import com.github.shader.demo.blendlayers.ShaderBlendLayerFactory;
 import com.github.shader.demo.blendlayers.ShaderBlendLayerManager;
 import com.github.shader.demo.blendlayers.effects.BlendLayerEffect;
 import com.github.shader.demo.blendlayers.effects.HSVCycleEffect;
@@ -44,7 +44,6 @@ import com.jme3.scene.debug.custom.ArmatureDebugAppState;
 import com.jme3.system.AppSettings;
 import com.simsilica.lemur.Axis;
 import com.simsilica.lemur.Button;
-import com.simsilica.lemur.Command;
 import com.simsilica.lemur.Container;
 import com.simsilica.lemur.FillMode;
 import com.simsilica.lemur.GuiGlobals;
@@ -92,7 +91,6 @@ public class Test_CharacterEffects3 extends SimpleApplication {
     private final Queue<String> animsQueue = new LinkedList<>();
   
     private BlendGroup blendGroup;
-    private Container appliedLayersContainer;
     
     @Override
     public void simpleInitApp() {
@@ -176,9 +174,7 @@ public class Test_CharacterEffects3 extends SimpleApplication {
     
     private Container activeBlendLayersContainer;
     
-    private ArrayList<ShaderBlendLayer> registeredBlendLayers = new ArrayList<>();
-    
-    public ShaderBlendLayerManager shaderBlendLayerManager;
+    private ShaderBlendLayerManager shaderBlendLayerManager;
     
     private Container queuedLayerStagingContainer;
     private Container queuedEffectStagingContainer;
@@ -189,11 +185,8 @@ public class Test_CharacterEffects3 extends SimpleApplication {
     private ShaderBlendLayer queuedShaderBlendLayer;
     private BlendLayerEffect queuedBlendLayerEffect;
     
-    private RollupPanel defaultLayerSelectionRollup, defaultEffectSelectionRollup;
-    
-    private Button addDynamicLayerButton;
-    
-    private Container dynamicLayersContainer;
+    private RollupPanel defaultLayerSelectionRollup;
+    private RollupPanel defaultEffectSelectionRollup;
     
     private final int reservedLayersCount = 2;
     
@@ -206,21 +199,19 @@ public class Test_CharacterEffects3 extends SimpleApplication {
         activeBlendLayersContainer = new Container(new SpringGridLayout(Axis.Y, Axis.X, FillMode.None, FillMode.Even));
         activeBlendLayersContainer.setLocalTranslation(10f, settings.getHeight() - 40f, 1);
 
-        for (int l = 0; l < reservedLayersCount; l++) {
-            Label Label = null;
-            Label = new Label("RL " + l + ":");
-            activeBlendLayersContainer.addChild(Label, l, 0);
-
+        for (int j = 0; j < reservedLayersCount; j++) {
+            Label label = new Label("RL " + j + ":");
+            activeBlendLayersContainer.addChild(label, j, 0);
         }
 
-        dynamicLayersContainer = new Container();
+        Container dynamicLayersContainer = new Container();
 
         activeBlendLayersContainer.addChild(dynamicLayersContainer, reservedLayersCount + 1, 1);
 
-        addDynamicLayerButton = new Button("Add Queued Layer");
+        Button addDynamicLayerButton = new Button("Add Queued Layer");
         dynamicLayersContainer.addChild(addDynamicLayerButton, 0, 1);
 
-        addDynamicLayerButton.addCommands(Button.ButtonAction.Click, (Command<Button>) (Button source) -> {
+        addDynamicLayerButton.addClickCommands(source -> {
             if (queuedShaderBlendLayer != null) {
                 this.shaderBlendLayerManager.registerTemporaryLayerToModel(queuedShaderBlendLayer, blendGroup);
                 dynamicLayersContainer.addChild(this.queuedBlendLayerDisplayContainer,
@@ -258,24 +249,24 @@ public class Test_CharacterEffects3 extends SimpleApplication {
         Container defaultBlendLayersContainer = new Container();
 
         Button addIceButton = new Button("Ice");
-        addIceButton.addCommands(Button.ButtonAction.Click, (Command<Button>) (Button source) -> {
-            setQueuedShaderBlendLayer(ShaderBlendLayerGenerator.makeDefaultIceLayer(assetManager));
+        addIceButton.addClickCommands(source -> {
+            setQueuedShaderBlendLayer(ShaderBlendLayerFactory.createDefaultIceLayer(assetManager));
         });
         Button addStoneButton = new Button("Stone");
-        addStoneButton.addCommands(Button.ButtonAction.Click, (Command<Button>) (Button source) -> {
-            setQueuedShaderBlendLayer(ShaderBlendLayerGenerator.makeDefaultStoneLayer(assetManager));
+        addStoneButton.addClickCommands(source -> {
+            setQueuedShaderBlendLayer(ShaderBlendLayerFactory.createDefaultStoneLayer(assetManager));
         });
         Button addShieldArmorButton = new Button("Shield");
-        addShieldArmorButton.addCommands(Button.ButtonAction.Click, (Command<Button>) (Button source) -> {
-            setQueuedShaderBlendLayer(ShaderBlendLayerGenerator.makeDefaultShieldArmorLayer(assetManager));
+        addShieldArmorButton.addClickCommands(source -> {
+            setQueuedShaderBlendLayer(ShaderBlendLayerFactory.createDefaultShieldArmorLayer(assetManager));
         });
         Button addRustButton = new Button("Rust");
-        addRustButton.addCommands(Button.ButtonAction.Click, (Command<Button>) (Button source) -> {
-            setQueuedShaderBlendLayer(ShaderBlendLayerGenerator.makeDefaultRustLayer(assetManager));
+        addRustButton.addClickCommands(source -> {
+            setQueuedShaderBlendLayer(ShaderBlendLayerFactory.createDefaultRustLayer(assetManager));
         });
         Button addBlankLayerButton = new Button("Custom_Layer");
-        addBlankLayerButton.addCommands(Button.ButtonAction.Click, (Command<Button>) (Button source) -> {
-            setQueuedShaderBlendLayer(ShaderBlendLayerGenerator.makeBlankLayer("" + blendGroup.getCurrentLayerCount()));
+        addBlankLayerButton.addClickCommands(source -> {
+            setQueuedShaderBlendLayer(ShaderBlendLayerFactory.createBlankLayer("" + blendGroup.getCurrentLayerCount()));
         });
         defaultBlendLayersContainer.addChild(addIceButton);
         defaultBlendLayersContainer.addChild(addStoneButton);
@@ -294,15 +285,15 @@ public class Test_CharacterEffects3 extends SimpleApplication {
         Container defaultBlendEffectsContainer = new Container();
 
         Button addSimpleTimeBlendEffectButton = new Button("Timed_Blend");
-        addSimpleTimeBlendEffectButton.addCommands(Button.ButtonAction.Click, (Command<Button>) (Button source) -> {
+        addSimpleTimeBlendEffectButton.addClickCommands(source -> {
             setQueuedEffect(new TimedBlendEffect());
         });
         Button addHeightScanEffectButton = new Button("Height_Scan");
-        addHeightScanEffectButton.addCommands(Button.ButtonAction.Click, (Command<Button>) (Button source) -> {
+        addHeightScanEffectButton.addClickCommands(source -> {
             setQueuedEffect(new HeightScanEffect());
         });
         Button addHsvCycleBlendEffectButton = new Button("HSV_Effect");
-        addHsvCycleBlendEffectButton.addCommands(Button.ButtonAction.Click, (Command<Button>) (Button source) -> {
+        addHsvCycleBlendEffectButton.addClickCommands(source -> {
             setQueuedEffect(new HSVCycleEffect());
         });
         defaultBlendEffectsContainer.addChild(addSimpleTimeBlendEffectButton);
@@ -426,37 +417,37 @@ public class Test_CharacterEffects3 extends SimpleApplication {
         }
     };
     
-    private void removeBlendLayerEffect(BlendLayerEffectDisplayContainer blendLayerEffectDisplayContainer) {
-        if (blendLayerEffectDisplayContainer.equals(this.queuedEffectDisplayContainer)) {
+    private void removeBlendLayerEffect(BlendLayerEffectDisplayContainer container) {
+        if (container.equals(this.queuedEffectDisplayContainer)) {
             this.queuedBlendLayerEffect = null;
         } else {
             queuedBlendLayerEffect.cancel();
         }
 
         // remove from display
-        if (blendLayerEffectDisplayContainer.getParent() != null) {
-            blendLayerEffectDisplayContainer.getParent().detachChild(blendLayerEffectDisplayContainer);
+        if (container.getParent() != null) {
+            container.getParent().detachChild(container);
         }
     }
 
-    private void removeShaderBlendLayer(ShaderBlendLayerDisplayContainer shaderBlendLayerDisplayContainer) {
+    private void removeShaderBlendLayer(ShaderBlendLayerDisplayContainer container) {
 
-        if (shaderBlendLayerDisplayContainer.getShaderBlendLayer() == this.queuedShaderBlendLayer) {
+        if (container.getShaderBlendLayer() == this.queuedShaderBlendLayer) {
             this.queuedShaderBlendLayer = null;
         }
 
         this.shaderBlendLayerManager.unregisterLayer(blendGroup,
-                shaderBlendLayerDisplayContainer.getShaderBlendLayer());
+                container.getShaderBlendLayer());
 
         // remove from display
-        if (shaderBlendLayerDisplayContainer.getParent() != null) {
-            shaderBlendLayerDisplayContainer.getParent().detachChild(shaderBlendLayerDisplayContainer);
+        if (container.getParent() != null) {
+            container.getParent().detachChild(container);
         }
     }
 
     private void applyEffectToLayer(ShaderBlendLayer layer, BlendLayerEffect effect) {
         if (layer != null && effect != null) {
-            layer.registerEffect(effect);
+            layer.addEffect(effect);
         }
     }
 
@@ -485,28 +476,26 @@ public class Test_CharacterEffects3 extends SimpleApplication {
     private ShaderBlendLayerDisplayContainer makeShaderBlendLayerDisplayContainer(ShaderBlendLayer layer) {
         ShaderBlendLayerDisplayContainer container = new ShaderBlendLayerDisplayContainer(layer);
 
-        container.xRemoveButton.addCommands(Button.ButtonAction.Click, (Command<Button>) (Button source) -> {
+        container.xRemoveButton.addClickCommands(source -> {
             removeShaderBlendLayer(container);
         });
 
-        container.addQueuedEffectToThisLayerButton.addCommands(Button.ButtonAction.Click,
-                (Command<Button>) (Button source) -> {
-
-                    if (queuedEffectDisplayContainer != null) {
-                        applyEffectToLayer(layer, queuedBlendLayerEffect);
-                        queuedBlendLayerEffect = null;
-                        if (queuedEffectDisplayContainer.getParent() != null) {
-                            queuedEffectDisplayContainer.getParent().detachChild(queuedEffectDisplayContainer);
-                        }
-                    }
-                });
+        container.addQueuedEffectToThisLayerButton.addClickCommands(source -> {
+            if (queuedEffectDisplayContainer != null) {
+                applyEffectToLayer(layer, queuedBlendLayerEffect);
+                queuedBlendLayerEffect = null;
+                if (queuedEffectDisplayContainer.getParent() != null) {
+                    queuedEffectDisplayContainer.getParent().detachChild(queuedEffectDisplayContainer);
+                }
+            }
+        });
 
         return container;
     }
 
     private BlendLayerEffectDisplayContainer makeBlendLayerDisplayContainer(BlendLayerEffect effect) {
         BlendLayerEffectDisplayContainer container = new BlendLayerEffectDisplayContainer(effect);
-        container.xRemoveButton.addCommands(Button.ButtonAction.Click, (Command<Button>) (Button source) -> {
+        container.xRemoveButton.addClickCommands(source -> {
             removeBlendLayerEffect(container);
         });
 
