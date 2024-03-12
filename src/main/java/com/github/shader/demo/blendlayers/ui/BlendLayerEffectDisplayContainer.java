@@ -22,14 +22,11 @@ public class BlendLayerEffectDisplayContainer extends Container {
     public Button xRemoveButton;
     public RollupPanel propertyPanel;
 
-    public BlendLayerEffect getBlendLayerEffect() {
-        return blendLayerEffect;
-    }
-
-    public RollupPanel getPropertyPanel() {
-        return propertyPanel;
-    }
-
+    /**
+     * Constructor.
+     * 
+     * @param blendLayerEffect
+     */
     public BlendLayerEffectDisplayContainer(BlendLayerEffect blendLayerEffect) {
         super();
         this.blendLayerEffect = blendLayerEffect;
@@ -44,7 +41,7 @@ public class BlendLayerEffectDisplayContainer extends Container {
         addChild(xRemoveButton, 0, 1);
     }
 
-    public RollupPanel makePropertiesPanel(String name, Object obj) {
+    private RollupPanel makePropertiesPanel(String name, Object obj) {
 
         // probably pass this in as a param so it can differ for effect vs blendLayer
         ConfigurationBuilder config = new ConfigurationBuilder();
@@ -59,6 +56,14 @@ public class BlendLayerEffectDisplayContainer extends Container {
         rollup.setAlpha(0, false);
         rollup.setOpen(false);
         return rollup;
+    }
+    
+    public BlendLayerEffect getBlendLayerEffect() {
+        return blendLayerEffect;
+    }
+
+    public RollupPanel getPropertyPanel() {
+        return propertyPanel;
     }
 
 }
