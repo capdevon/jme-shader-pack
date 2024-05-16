@@ -193,10 +193,12 @@ void readMatParamsAndTextures(in mat3 tbnMat, in vec3 vViewDir, inout vec4 albed
     
     #if defined(EMISSIVE) || defined (EMISSIVEMAP)
         #ifdef EMISSIVEMAP
-            emissive = texture2D(m_EmissiveMap, newTexCoord);
+            emissive = texture2D(m_EmissiveMap, newTexCoord);    
             #ifdef EMISSIVE
-            emissive *= m_Emissive;
-            #endif
+                emissive *= m_Emissive;
+            #endif  
+        #else
+            emissive = m_Emissive; 
         #endif
         emissive = emissive * pow(emissive.a, m_EmissivePower) * m_EmissiveIntensity;
     #endif
