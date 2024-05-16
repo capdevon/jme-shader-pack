@@ -1,6 +1,6 @@
 package com.github.shader.demo.states;
 
-import java.util.Arrays;
+import java.util.ArrayList;
 import java.util.List;
 
 import com.jme3.app.Application;
@@ -111,9 +111,9 @@ public class DefaultSceneState extends MySimpleState {
         Texture albedoMap = assetManager.loadTexture(grass + "baseColor.png");
         Texture normalMap = assetManager.loadTexture(grass + "normal.png");
         Texture metallicRoughnessAoEiMap = assetManager.loadTexture( grass + "occlusionRoughnessMetallic.png");
-        TextureArray albedoTextureArray = makeSingleImageTextureArray(albedoMap);
-        TextureArray normalTextureArray = makeSingleImageTextureArray(normalMap);
-        TextureArray metallicRoughnessTextureArray = makeSingleImageTextureArray(metallicRoughnessAoEiMap);
+        TextureArray albedoTextureArray = createTextureArray(albedoMap);
+        TextureArray normalTextureArray = createTextureArray(normalMap);
+        TextureArray metallicRoughnessTextureArray = createTextureArray(metallicRoughnessAoEiMap);
 
         pbr.setInt("AlbedoMap_0", 0);
         pbr.setInt("NormalMap_0", 0);
@@ -131,8 +131,11 @@ public class DefaultSceneState extends MySimpleState {
         rootNode.attachChild(terrain);
     }
 
-    private TextureArray makeSingleImageTextureArray(Texture texture) {
-        List<Image> images = Arrays.asList(texture.getImage());
+    private TextureArray createTextureArray(Texture... textures) {
+        List<Image> images = new ArrayList<>();
+        for (Texture tex : textures) {
+            images.add(tex.getImage());
+        }
         TextureArray texArray = new TextureArray(images);
         texArray.setWrap(WrapMode.Repeat);
         texArray.setMagFilter(Texture.MagFilter.Bilinear);
