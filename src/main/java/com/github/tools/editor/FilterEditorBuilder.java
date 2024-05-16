@@ -21,35 +21,42 @@ public class FilterEditorBuilder extends AbstractEditor<ViewPort> {
     public Container buildPanel(ViewPort viewPort) {
 
         Container container = new Container(new SpringGridLayout(Axis.Y, Axis.X, FillMode.None, FillMode.Even));
-//        TabbedPanel tabbedPanel = container.addChild(new TabbedPanel());
+        //TabbedPanel tabbedPanel = container.addChild(new TabbedPanel());
         
         for (SceneProcessor processor : viewPort.getProcessors()) {
             if (processor instanceof FilterPostProcessor) {
                 FilterPostProcessor fpp = (FilterPostProcessor) processor;
                 for (Filter filter : fpp.getFilterList()) {
-                    System.out.println("------------------------------------");
-                    System.out.println("Name: " + filter.getName());
-
-                    try {
-                        ReflectedEditorBuilder builder = new ReflectedEditorBuilder();
-                        Panel panel = builder.buildPanel(filter);
-                        
-                        String title = filter.getClass().getSimpleName();
-                        RollupPanel rollup = new RollupPanel(title, panel, "glass");
-                        rollup.setAlpha(0, false);
-                        rollup.setOpen(false);
-                        container.addChild(rollup);
-
-//                        tabbedPanel.addTab(title, panel);
-                        
-                    } catch (Exception e) {
-                        e.printStackTrace();
-                    }
+                    
+                    System.out.println("buildPanel Filter: " + filter.getName());
+                    buildPanel(container, filter);
                 }
             }
         }
 
         return container;
+    }
+
+    /**
+     * @param container
+     * @param filter
+     */
+    private void buildPanel(Container container, Filter filter) {
+        try {
+            ReflectedEditorBuilder builder = new ReflectedEditorBuilder();
+            Panel panel = builder.buildPanel(filter);
+
+            String title = filter.getClass().getSimpleName();
+            RollupPanel rollup = new RollupPanel(title, panel, "glass");
+            rollup.setAlpha(0, false);
+            rollup.setOpen(false);
+            container.addChild(rollup);
+
+            //tabbedPanel.addTab(title, panel);
+
+        } catch (Exception e) {
+            e.printStackTrace();
+        }
     }
 
 }
