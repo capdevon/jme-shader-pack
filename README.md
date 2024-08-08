@@ -7,7 +7,7 @@
 - [SkyControl](https://github.com/stephengold/SkyControl) - A sky simulation library for jMonkeyEngine
 - java 11+
 
-## Youtube Videos
+## YouTube Videos
 [Shader Debug Mode](https://www.youtube.com/watch?v=uety3jMXFpI)
 
 ## Credits
