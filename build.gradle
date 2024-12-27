@@ -2,46 +2,42 @@ plugins {
     id 'java-library'
 }
 
-description = 'TechDemo'
+java {
+    // select one source-code (JDK) option
+    sourceCompatibility = JavaVersion.VERSION_11
+    targetCompatibility = JavaVersion.VERSION_11
+}
 
-// select one source-code (JDK) option
-sourceCompatibility = JavaVersion.VERSION_11
-targetCompatibility = JavaVersion.VERSION_11
+project.ext {
+    jmeVersion = '3.7.0-stable'
+}
 
-// select one version of the Engine:
-//ext.jmeVersion = '3.6.1-stable' // from mavenCentral
-ext.jmeVersion = '3.7.0-SNAPSHOT' // from mavenLocal or SonaType
+tasks.withType(JavaCompile).configureEach { // Java compile-time options:
+    options.compilerArgs << '-Xdiags:verbose'
+    options.compilerArgs << '-Xlint:unchecked'
+    options.deprecation = true // to provide detailed deprecation warnings
+    options.encoding = 'UTF-8'
+    options.release = 11
+}
 
-gradle.projectsEvaluated {
-    tasks.withType(JavaCompile) { // compile-time options:
-        options.compilerArgs << '-Xdiags:verbose'
-        options.compilerArgs << '-Xlint:unchecked'
-        options.deprecation = true
-        options.encoding = 'UTF-8'
+import org.gradle.nativeplatform.platform.internal.DefaultNativePlatform
+Boolean isMacOS = DefaultNativePlatform.currentOperatingSystem.isMacOsX()
+
+tasks.withType(JavaExec).configureEach { // Java runtime options:
+    if (isMacOS) {
+        jvmArgs '-XstartOnFirstThread'
     }
-    tasks.withType(JavaExec) { // runtime options:
-        args = []
-        classpath sourceSets.main.runtimeClasspath
-        //debug true
-        enableAssertions true
-        //jvmArgs '-verbose:gc'
-        //jvmArgs '-Xbatch'
-        //jvmArgs '-Xms512m', '-Xmx512m'
-        //jvmArgs '-XX:+PrintCompilation'
-        //jvmArgs '-XX:+UseConcMarkSweepGC'
-        jvmArgs '-XX:+UseG1GC', '-XX:MaxGCPauseMillis=10'
-    }
+    classpath sourceSets.main.runtimeClasspath
+    enableAssertions true
+    //jvmArgs '-verbose:gc'
+    //jvmArgs '-Xbatch'
+    //jvmArgs '-Xms256m', '-Xmx256m' // to enlarge the Java heap
+    //jvmArgs '-XX:+PrintCompilation'
+    //jvmArgs '-XX:+UseG1GC', '-XX:MaxGCPauseMillis=10'
 }
 
 repositories {
     mavenCentral()
-    // to find public snapshots of libraries
-    maven { url 'https://s01.oss.sonatype.org/content/repositories/snapshots' }
-}
-
-configurations.all {
-    // to disable caching of snapshots
-    resolutionStrategy.cacheChangingModulesFor 0, 'seconds' 
 }
 
 dependencies {
@@ -50,9 +46,13 @@ dependencies {
     implementation 'org.jmonkeyengine:jme3-desktop:' + jmeVersion
     implementation 'org.jmonkeyengine:jme3-effects:' + jmeVersion
     implementation 'org.jmonkeyengine:jme3-terrain:' + jmeVersion
-    runtimeOnly    'org.jmonkeyengine:jme3-awt-dialogs:' + jmeVersion
+
+    // Mac OS with LWJGL 3 doesn't allow AWT/Swing
+    if (!System.getProperty("os.name").toLowerCase().contains("mac")) {
+        runtimeOnly 'org.jmonkeyengine:jme3-awt-dialogs:' + jmeVersion
+    }
     
-    //implementation 'com.github.stephengold:Minie:8.1.0+big4'
+    //implementation 'com.github.stephengold:Minie:8.2.0+big4'
     implementation 'com.github.stephengold:Heart:9.1.0'
     implementation 'com.github.stephengold:SkyControl:1.0.5'
 
@@ -74,17 +74,23 @@ dependencies {
     runtimeOnly 'org.codehaus.groovy:groovy-jsr223:3.0.16'
 }
 
-// cleanup tasks
+wrapper {
+    gradleVersion = '8.4'
+}
+
+// Register cleanup tasks:
+
 clean.dependsOn('cleanDLLs', 'cleanDyLibs', 'cleanLogs', 'cleanSOs')
-task cleanDLLs(type: Delete) {
+
+tasks.register('cleanDLLs', Delete) { // extracted Windows native libraries
     delete fileTree(dir: '.', include: '*.dll')
 }
-task cleanDyLibs(type: Delete) {
+tasks.register('cleanDyLibs', Delete) { // extracted macOS native libraries
     delete fileTree(dir: '.', include: '*.dylib')
 }
-task cleanLogs(type: Delete) {
+tasks.register('cleanLogs', Delete) { // JVM crash logs
     delete fileTree(dir: '.', include: 'hs_err_pid*.log')
 }
-task cleanSOs(type: Delete) {
+tasks.register('cleanSOs', Delete) { // extracted Linux and Android native libraries
     delete fileTree(dir: '.', include: '*.so')
 }
