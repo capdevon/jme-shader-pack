@@ -9,7 +9,7 @@ java {
 }
 
 project.ext {
-    jmeVersion = '3.7.0-stable'
+    jmeVersion = '3.8.1-stable'
 }
 
 tasks.withType(JavaCompile).configureEach { // Java compile-time options:
@@ -94,3 +94,4 @@ tasks.register('cleanLogs', Delete) { // JVM crash logs
 tasks.register('cleanSOs', Delete) { // extracted Linux and Android native libraries
     delete fileTree(dir: '.', include: '*.so')
 }
+
